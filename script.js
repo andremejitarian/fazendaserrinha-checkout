@@ -1,8 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('estadiaForm');
 
+    // Função para mostrar a tela do formulário
+    window.showFormScreen = function() {
+        document.getElementById('welcomeScreen').classList.remove('active');
+        document.getElementById('formScreen').classList.add('active');
+    }
+
+    // Função para mostrar a tela de boas-vindas
+    window.showWelcomeScreen = function() {
+        document.getElementById('formScreen').classList.remove('active');
+        document.getElementById('welcomeScreen').classList.add('active');
+    }
+
+    // Manipulador do envio do formulário
     form.addEventListener('submit', (event) => {
-        event.preventDefault(); // Impede o envio padrão do formulário
+        event.preventDefault();
 
         // Coleta os dados do formulário
         const formData = {
@@ -16,20 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
             comunicacoesFazenda: document.querySelector('input[name="comunicacoesFazenda"]:checked') ? document.querySelector('input[name="comunicacoesFazenda"]:checked').value : 'não informado'
         };
 
-        // Validação adicional (exemplo: se você quisesse mais do que apenas o 'required' do HTML)
+        // Validação adicional
         if (!formData.aceitoRegulamento) {
             alert('Você deve aceitar o Regulamento Interno para prosseguir.');
             return;
         }
 
-        // Simula o envio dos dados (neste caso, apenas loga no console)
+        // Simula o envio dos dados
         console.log('Dados do Formulário:', formData);
-
         alert('Formulário enviado com sucesso! Verifique o console para os dados.');
 
-        // Aqui você faria uma requisição AJAX (fetch ou XMLHttpRequest) para enviar os dados para um servidor.
+        // Aqui você faria uma requisição AJAX para enviar os dados para um servidor
         /*
-        fetch('/api/submit-form', { // Substitua por sua URL de API
+        fetch('/api/submit-form', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -40,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             console.log('Sucesso:', data);
             alert('Formulário enviado com sucesso!');
-            form.reset(); // Limpa o formulário após o envio
+            form.reset();
+            showWelcomeScreen(); // Volta para a tela inicial
         })
         .catch((error) => {
             console.error('Erro:', error);
