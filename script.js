@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('estadiaForm');
     
     // URL da webhook do n8n
-    const WEBHOOK_URL = 'https://criadordigital-n8n-editor.kttqgl.easypanel.host/webhook-test/68e356a9-4714-438a-bad7-06ed5f4ba262';
+    const WEBHOOK_URL = 'https://criadordigital-n8n-editor.kttqgl.easypanel.host/webhook-test/91479e0c-d686-42dd-a381-c3e44d50df7e';
 
     // Função para mostrar a tela do formulário
     window.showFormScreen = function() {
