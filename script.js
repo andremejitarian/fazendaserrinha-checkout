@@ -127,51 +127,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ===== NOVA: VALIDAÇÃO DE CPF VIA WEBHOOK (CORRIGIDA) =====
-    async function validarCPFViaWebhook(cpf) {
-        try {
-            const cpfLimpo = cpf.replace(/[^\d]/g, ''); // Remove formatação
-            console.log('🔍 Validando CPF via webhook:', cpfLimpo);
-            
-            const response = await fetch(CPF_VALIDATION_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    cpf: cpfLimpo // Envia apenas números
-                })
-            });
+async function validarCPFViaWebhook(cpf) {
+    try {
+        const cpfLimpo = cpf.replace(/[^\d]/g, ''); // Remove formatação
+        console.log('🔍 Validando CPF via webhook:', cpfLimpo);
+        
+        const response = await fetch(CPF_VALIDATION_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                cpf: cpfLimpo // Envia apenas números
+            })
+        });
 
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
-            }
-
-            const responseData = await response.json();
-            console.log('📋 Resposta completa da validação CPF:', responseData);
-
-            // Trata a resposta no formato: [{"cpf": "37253211839", "valido": true}]
-            if (Array.isArray(responseData) && responseData.length > 0) {
-                const resultado = responseData[0];
-                
-                // Verifica se o objeto tem a propriedade 'valido'
-                if (resultado && typeof resultado.valido === 'boolean') {
-                    console.log(`✅ CPF ${resultado.cpf} - Válido: ${resultado.valido}`);
-                    return resultado.valido;
-                }
-            }
-
-            // Se não conseguiu interpretar a resposta, retorna false
-            console.log('⚠️ Formato de resposta não reconhecido:', responseData);
-            return false;
-
-        } catch (error) {
-            console.error('❌ Erro na validação do CPF via webhook:', error);
-            // Em caso de erro na API, usa validação local como fallback
-            console.log('🔄 Usando validação local como fallback');
-            return validarCPFLocal(cpf);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
         }
+
+        const responseData = await response.json();
+        console.log('📋 Resposta completa da validação CPF:', responseData);
+
+        // Trata a resposta no formato: [{"cpf": "12312312300", "valido": "true"}] ou [{"cpf": "12312312300", "valido": "false"}]
+        if (Array.isArray(responseData) && responseData.length > 0) {
+            const resultado = responseData[0];
+            
+            // Verifica se o objeto tem a propriedade 'valido'
+            if (resultado && resultado.hasOwnProperty('valido')) {
+                const validoValue = resultado.valido;
+                
+                // Trata tanto string quanto boolean
+                let isValid = false;
+                
+                if (typeof validoValue === 'string') {
+                    isValid = validoValue.toLowerCase().trim() === 'true';
+                } else if (typeof validoValue === 'boolean') {
+                    isValid = validoValue;
+                }
+                
+                console.log(`✅ CPF ${resultado.cpf} - Válido: ${isValid} (valor original: ${validoValue}, tipo: ${typeof validoValue})`);
+                return isValid;
+            }
+        }
+
+        // Se não conseguiu interpretar a resposta, retorna false
+        console.log('⚠️ Formato de resposta não reconhecido:', responseData);
+        return false;
+
+    } catch (error) {
+        console.error('❌ Erro na validação do CPF via webhook:', error);
+        // Em caso de erro na API, usa validação local como fallback
+        console.log('🔄 Usando validação local como fallback');
+        return validarCPFLocal(cpf);
     }
+}
 
     // ===== FUNÇÃO PARA CONVERTER VALOR PARA NÚMERO =====
     function converterValorParaNumero(valorFormatado) {
