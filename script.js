@@ -126,10 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // ===== NOVA: VALIDAÇÃO DE CPF VIA WEBHOOK =====
+    // ===== NOVA: VALIDAÇÃO DE CPF VIA WEBHOOK (CORRIGIDA) =====
     async function validarCPFViaWebhook(cpf) {
         try {
-            console.log('🔍 Validando CPF via webhook:', cpf);
+            const cpfLimpo = cpf.replace(/[^\d]/g, ''); // Remove formatação
+            console.log('🔍 Validando CPF via webhook:', cpfLimpo);
             
             const response = await fetch(CPF_VALIDATION_URL, {
                 method: 'POST',
@@ -138,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    cpf: cpf.replace(/[^\d]/g, '') // Envia apenas números
+                    cpf: cpfLimpo // Envia apenas números
                 })
             });
 
@@ -146,28 +147,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
             }
 
-            let responseData;
-            try {
-                responseData = await response.json();
-            } catch (e) {
-                // Se não for JSON, tenta interpretar como texto
-                const textResponse = await response.text();
-                // Verifica se a resposta é "true" ou "false" como string
-                responseData = textResponse.toLowerCase().trim() === 'true';
+            const responseData = await response.json();
+            console.log('📋 Resposta completa da validação CPF:', responseData);
+
+            // Trata a resposta no formato: [{"cpf": "37253211839", "valido": true}]
+            if (Array.isArray(responseData) && responseData.length > 0) {
+                const resultado = responseData[0];
+                
+                // Verifica se o objeto tem a propriedade 'valido'
+                if (resultado && typeof resultado.valido === 'boolean') {
+                    console.log(`✅ CPF ${resultado.cpf} - Válido: ${resultado.valido}`);
+                    return resultado.valido;
+                }
             }
 
-            console.log('📋 Resposta da validação CPF:', responseData);
-
-            // Verifica diferentes formatos de resposta
-            if (typeof responseData === 'boolean') {
-                return responseData;
-            } else if (typeof responseData === 'object' && responseData !== null) {
-                // Se for objeto, procura por propriedades comuns
-                return responseData.valid || responseData.isValid || responseData.success || false;
-            } else if (typeof responseData === 'string') {
-                return responseData.toLowerCase().trim() === 'true';
-            }
-
+            // Se não conseguiu interpretar a resposta, retorna false
+            console.log('⚠️ Formato de resposta não reconhecido:', responseData);
             return false;
 
         } catch (error) {
@@ -275,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const textoOriginal = submitButton.innerHTML;
         
         // Ativa o loading
-        submitButton.innerHTML = '<span class="loading-spinner"></span> Validando...';
+        submitButton.innerHTML = '<span class="loading-spinner"></span> Validando CPF...';
         submitButton.disabled = true;
         submitButton.style.opacity = '0.7';
 
@@ -314,20 +309,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // ===== VALIDAÇÃO DO CPF VIA WEBHOOK (NOVA) =====
+        // ===== VALIDAÇÃO DO CPF VIA WEBHOOK (CORRIGIDA) =====
         console.log('🔍 Iniciando validação do CPF...');
         const cpfValido = await validarCPFViaWebhook(formData.cpf);
         
         if (!cpfValido) {
             restaurarBotao();
-            mostrarMensagem('❌ CPF inválido. Por favor, verifique e digite um CPF válido.', 'erro');
+            mostrarMensagem('❌ CPF inválido ou não encontrado. Por favor, verifique e digite um CPF válido.', 'erro');
             return;
         }
         
-        console.log('✅ CPF validado com sucesso!');
+        console.log('✅ CPF validado com sucesso via webhook!');
 
         // Atualiza o loading para "Enviando..."
-        submitButton.innerHTML = '<span class="loading-spinner"></span> Enviando...';
+        submitButton.innerHTML = '<span class="loading-spinner"></span> Enviando dados...';
 
         // Validação de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
