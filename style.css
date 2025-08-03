@@ -395,3 +395,97 @@ input::placeholder {
         font-size: 0.9rem;
     }
 }
+/* ===== ESTILOS PARA AS MELHORIAS ===== */
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff40;
+    border-radius: 50%;
+    border-top-color: #ffffff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Mensagens de Feedback */
+.mensagem-feedback {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    animation: slideIn 0.3s ease-out;
+}
+
+.mensagem-feedback.sucesso {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.mensagem-feedback.erro {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.mensagem-conteudo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mensagem-icone {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.mensagem-texto {
+    line-height: 1.4;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsividade para mensagens */
+@media (max-width: 480px) {
+    .mensagem-feedback {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        font-size: 0.9rem;
+    }
+}
+
+/* Melhorias visuais para campos com erro */
+.campo-erro {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Estilo para campos válidos */
+.campo-valido {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
