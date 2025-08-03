@@ -1,0 +1,271 @@
+/* Reset Básico */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Cabeçalho com Imagem de Fundo */
+.header-background {
+    width: 100%;
+    height: 250px; /* Altura da imagem de fundo */
+    background-image: url('images/placeholder-background.jpg'); /* Imagem de fundo */
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Seção do Logo */
+.logo-section {
+    position: relative;
+    width: 100%;
+    height: 0; /* Não ocupa espaço, apenas para posicionamento do logo */
+    z-index: 2; /* Garante que o logo esteja acima da imagem de fundo */
+    top: -60px; /* Ajusta a posição vertical do logo para sobrepor o cabeçalho */
+}
+
+.logo {
+    display: block;
+    width: 120px; /* Tamanho do logo */
+    height: 120px;
+    border-radius: 50%; /* Torna o logo circular */
+    background-color: #fff; /* Fundo branco para o logo, se a imagem tiver transparência */
+    border: 5px solid #fff; /* Borda branca ao redor do logo */
+    margin: 0 auto; /* Centraliza o logo horizontalmente */
+    object-fit: contain; /* Garante que a imagem do logo se ajuste sem cortar */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra suave para o logo */
+    transform: translateY(-50%); /* Ajusta verticalmente para sobrepor o cabeçalho */
+}
+
+
+/* Container Principal */
+.container {
+    max-width: 700px;
+    margin: -60px auto 40px auto; /* Ajusta a margem superior para compensar o logo */
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    position: relative; /* Para garantir que o z-index funcione com o logo */
+    z-index: 2;
+}
+
+/* Link Voltar */
+.back-link {
+    display: inline-block;
+    color: #555;
+    text-decoration: none;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    padding-left: 5px;
+}
+
+.back-link:hover {
+    color: #000;
+}
+
+/* Títulos de Seção */
+h2 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+h2.hidden {
+    display: none; /* Oculta o h2 para LGPD, mas mantém a semântica */
+}
+
+/* Grupos de Formulário */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Labels */
+label {
+    display: block;
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* Inputs de Texto, Email, Telefone, Data */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #333;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus {
+    border-color: #007bff; /* Cor de destaque no foco */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Placeholders */
+input::placeholder {
+    color: #aaa;
+}
+
+/* Texto Legal (LGPD, Regulamento) */
+.legal-text {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 25px;
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+.legal-text strong {
+    color: #333;
+}
+
+.legal-text a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.legal-text a:hover {
+    text-decoration: underline;
+}
+
+/* Checkboxes e Radios */
+.checkbox-group, .radio-group {
+    display: flex;
+    align-items: flex-start; /* Alinha o texto ao topo da checkbox/radio */
+    margin-bottom: 15px;
+}
+
+.checkbox-group input[type="checkbox"],
+.radio-group input[type="radio"] {
+    width: auto; /* Permite que o tamanho seja o padrão do navegador */
+    margin-right: 10px;
+    flex-shrink: 0; /* Previne que o input encolha */
+    transform: scale(1.2); /* Aumenta um pouco o tamanho visual */
+    margin-top: 3px; /* Pequeno ajuste para alinhamento vertical */
+}
+
+.checkbox-group label,
+.radio-group label {
+    margin-bottom: 0; /* Remove a margem inferior padrão das labels */
+    font-weight: normal; /* Labels de checkbox/radio não precisam ser bold */
+    cursor: pointer;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+/* Botão de Envio */
+.submit-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espaço entre o texto e a seta */
+    background-color: #1a1a1a; /* Cor de fundo escura */
+    color: #fff;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: fit-content; /* Se ajusta ao conteúdo */
+    margin-top: 30px;
+    margin-left: auto; /* Alinha à direita */
+    margin-right: auto; /* Alinha à direita, mas com flexbox para centralizar */
+}
+
+.submit-button:hover {
+    background-color: #333;
+    transform: translateY(-2px); /* Efeito suave ao passar o mouse */
+}
+
+/* Responsividade Básica */
+@media (max-width: 768px) {
+    .container {
+        margin-top: -60px; /* Ajusta para dispositivos menores */
+        padding: 20px;
+    }
+    .header-background {
+        height: 180px;
+    }
+    .logo-section {
+        top: -40px;
+    }
+    .logo {
+        width: 100px;
+        height: 100px;
+        border-width: 4px;
+    }
+    h2 {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"] {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+    .legal-text {
+        font-size: 0.85rem;
+        margin-top: 20px;
+        margin-bottom: 15px;
+    }
+    .checkbox-group label,
+    .radio-group label {
+        font-size: 0.9rem;
+    }
+    .submit-button {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+        border-radius: 0; /* Sem borda em telas muito pequenas para usar toda largura */
+        box-shadow: none;
+    }
+    .logo {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+    }
+    .header-background {
+        height: 150px;
+    }
+    .logo-section {
+        top: -30px;
+    }
+    .back-link {
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+}
