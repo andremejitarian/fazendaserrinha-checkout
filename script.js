@@ -226,22 +226,36 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Validação de datas
-        const hoje = new Date();
-        const chegada = new Date(formData.dataChegada);
-        const saida = new Date(formData.dataSaida);
+// Validação de datas
+const hoje = new Date();
+const chegada = new Date(formData.dataChegada);
+const saida = new Date(formData.dataSaida);
 
-        if (chegada < hoje.setHours(0,0,0,0)) {
-            restaurarBotao();
-            mostrarMensagem('A data de chegada não pode ser no passado.', 'erro');
-            return;
-        }
+// Calcula a data limite (60 dias antes de hoje)
+const dataLimite = new Date();
+dataLimite.setDate(hoje.getDate() - 60);
+dataLimite.setHours(0, 0, 0, 0);
 
-        if (saida <= chegada) {
-            restaurarBotao();
-            mostrarMensagem('A data de saída deve ser posterior à data de chegada.', 'erro');
-            return;
-        }
+// Normaliza as datas para comparação (remove horário)
+const chegadaNormalizada = new Date(chegada);
+chegadaNormalizada.setHours(0, 0, 0, 0);
+
+const saidaNormalizada = new Date(saida);
+saidaNormalizada.setHours(0, 0, 0, 0);
+
+// Validação: data de chegada não pode ser anterior a 60 dias atrás
+if (chegadaNormalizada < dataLimite) {
+    restaurarBotao();
+    mostrarMensagem('A data de chegada não pode ser anterior a 60 dias da data atual.', 'erro');
+    return;
+}
+
+// Validação: data de saída deve ser posterior à data de chegada
+if (saidaNormalizada <= chegadaNormalizada) {
+    restaurarBotao();
+    mostrarMensagem('A data de saída deve ser posterior à data de chegada.', 'erro');
+    return;
+}
 
         // ===== ENVIO PARA N8N =====
         console.log('📤 Enviando dados para n8n...', formData);
