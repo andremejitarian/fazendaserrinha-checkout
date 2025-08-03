@@ -45,11 +45,11 @@ body {
     padding-bottom: 40px;
 }
 
-/* Container do Logo (Círculo Branco) - REUTILIZADO PARA AMBAS AS PÁGINAS */
+/* Container do Logo (Círculo Branco) - USADO PARA AMBAS AS PÁGINAS */
 .logo-container {
     position: absolute;
     top: 0;
-    left: 40px; /* Posição à esquerda para a primeira página */
+    left: 40px; /* Posição à esquerda para AMBAS as páginas */
     transform: translateY(-50%); /* Levanta o logo para metade de sua altura */
     width: 120px;
     height: 120px;
@@ -117,12 +117,6 @@ h1 {
 }
 
 /* ===== SEGUNDA TELA: FORMULÁRIO ===== */
-
-/* Posição específica do logo para a segunda página (centralizado) */
-.form-page-logo {
-    left: 50%; /* Centraliza horizontalmente */
-    transform: translate(-50%, -50%); /* Centraliza e levanta o logo para metade de sua altura */
-}
 
 /* Container Principal do Formulário */
 .container {
@@ -301,6 +295,7 @@ input::placeholder {
     .logo-container {
         width: 100px;
         height: 100px;
+        left: 20px; /* Ajustado para telas menores, mas mantém à esquerda */
     }
 
     .logo-container .logo-image {
@@ -371,6 +366,7 @@ input::placeholder {
     .logo-container {
         width: 90px;
         height: 90px;
+        left: 15px; /* Ajustado para telas muito pequenas, mas mantém à esquerda */
     }
 
     .logo-container .logo-image {
