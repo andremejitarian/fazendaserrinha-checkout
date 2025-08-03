@@ -1,60 +1,154 @@
-/* Reset Básico */
+/* Reset Básico e Fontes */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    line-height: 1.6;
+    color: #333;
+}
+
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
-    color: #333;
-    line-height: 1.6;
+/* Sistema de Telas */
+.screen {
+    display: none;
+    min-height: 100vh;
 }
 
-/* Cabeçalho com Imagem de Fundo */
+.screen.active {
+    display: block;
+}
+
+/* ===== PRIMEIRA TELA: BOAS-VINDAS ===== */
+
+/* Seção de Fundo Superior */
 .header-background {
-    width: 100%;
-    height: 250px; /* Altura da imagem de fundo */
-    background-image: url('images/placeholder-background.jpg'); /* Imagem de fundo */
+    height: 250px;
+    background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
     background-size: cover;
-    background-position: center;
+    background-position: center center;
+    background-repeat: no-repeat;
     position: relative;
-    z-index: 1;
 }
+
+/* Card Principal (Área Branca com Conteúdo) */
+.main-screen-card {
+    background-color: white;
+    max-width: 800px;
+    margin: -80px auto 40px auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+
+/* Container do Logo (Círculo Branco) */
+.logo-container {
+    position: absolute;
+    top: 0;
+    left: 40px;
+    transform: translateY(-50%);
+    width: 120px;
+    height: 120px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 2;
+}
+
+.logo-image {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+/* Seção de Conteúdo (Título, Parágrafo, Botão) */
+.content-section {
+    padding: 0 40px;
+    padding-top: 20px;
+}
+
+h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #222;
+    margin-top: 0;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.content-section p {
+    font-size: 1.15rem;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+/* Botão "Avançar" */
+.button-advance {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: black;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.button-advance:hover {
+    background-color: #333;
+}
+
+.arrow {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* ===== SEGUNDA TELA: FORMULÁRIO ===== */
 
 /* Seção do Logo */
 .logo-section {
     position: relative;
     width: 100%;
-    height: 0; /* Não ocupa espaço, apenas para posicionamento do logo */
-    z-index: 2; /* Garante que o logo esteja acima da imagem de fundo */
-    top: -60px; /* Ajusta a posição vertical do logo para sobrepor o cabeçalho */
+    height: 0;
+    z-index: 2;
+    top: -60px;
 }
 
 .logo {
     display: block;
-    width: 120px; /* Tamanho do logo */
+    width: 120px;
     height: 120px;
-    border-radius: 50%; /* Torna o logo circular */
-    background-color: #fff; /* Fundo branco para o logo, se a imagem tiver transparência */
-    border: 5px solid #fff; /* Borda branca ao redor do logo */
-    margin: 0 auto; /* Centraliza o logo horizontalmente */
-    object-fit: contain; /* Garante que a imagem do logo se ajuste sem cortar */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra suave para o logo */
-    transform: translateY(-50%); /* Ajusta verticalmente para sobrepor o cabeçalho */
+    border-radius: 50%;
+    background-color: #fff;
+    border: 5px solid #fff;
+    margin: 0 auto;
+    object-fit: contain;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-50%);
 }
-
 
 /* Container Principal */
 .container {
     max-width: 700px;
-    margin: -60px auto 40px auto; /* Ajusta a margem superior para compensar o logo */
+    margin: -60px auto 40px auto;
     background-color: #fff;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    position: relative; /* Para garantir que o z-index funcione com o logo */
+    position: relative;
     z-index: 2;
 }
 
@@ -67,6 +161,9 @@ body {
     font-size: 1rem;
     font-weight: 600;
     padding-left: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
 .back-link:hover {
@@ -85,7 +182,7 @@ h2 {
 }
 
 h2.hidden {
-    display: none; /* Oculta o h2 para LGPD, mas mantém a semântica */
+    display: none;
 }
 
 /* Grupos de Formulário */
@@ -121,7 +218,7 @@ input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="tel"]:focus,
 input[type="date"]:focus {
-    border-color: #007bff; /* Cor de destaque no foco */
+    border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
@@ -156,23 +253,23 @@ input::placeholder {
 /* Checkboxes e Radios */
 .checkbox-group, .radio-group {
     display: flex;
-    align-items: flex-start; /* Alinha o texto ao topo da checkbox/radio */
+    align-items: flex-start;
     margin-bottom: 15px;
 }
 
 .checkbox-group input[type="checkbox"],
 .radio-group input[type="radio"] {
-    width: auto; /* Permite que o tamanho seja o padrão do navegador */
+    width: auto;
     margin-right: 10px;
-    flex-shrink: 0; /* Previne que o input encolha */
-    transform: scale(1.2); /* Aumenta um pouco o tamanho visual */
-    margin-top: 3px; /* Pequeno ajuste para alinhamento vertical */
+    flex-shrink: 0;
+    transform: scale(1.2);
+    margin-top: 3px;
 }
 
 .checkbox-group label,
 .radio-group label {
-    margin-bottom: 0; /* Remove a margem inferior padrão das labels */
-    font-weight: normal; /* Labels de checkbox/radio não precisam ser bold */
+    margin-bottom: 0;
+    font-weight: normal;
     cursor: pointer;
     color: #333;
     font-size: 0.95rem;
@@ -183,8 +280,8 @@ input::placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px; /* Espaço entre o texto e a seta */
-    background-color: #1a1a1a; /* Cor de fundo escura */
+    gap: 8px;
+    background-color: #1a1a1a;
     color: #fff;
     padding: 15px 25px;
     border: none;
@@ -193,21 +290,58 @@ input::placeholder {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    width: fit-content; /* Se ajusta ao conteúdo */
+    width: fit-content;
     margin-top: 30px;
-    margin-left: auto; /* Alinha à direita */
-    margin-right: auto; /* Alinha à direita, mas com flexbox para centralizar */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .submit-button:hover {
     background-color: #333;
-    transform: translateY(-2px); /* Efeito suave ao passar o mouse */
+    transform: translateY(-2px);
 }
 
-/* Responsividade Básica */
+/* ===== RESPONSIVIDADE ===== */
+
 @media (max-width: 768px) {
+    .main-screen-card {
+        margin: -60px 20px 30px 20px;
+        padding-top: 50px;
+    }
+
+    .logo-container {
+        width: 100px;
+        height: 100px;
+        top: 0;
+        left: 20px;
+        transform: translateY(-50%);
+    }
+
+    .logo-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    .content-section {
+        padding: 0 20px;
+        padding-top: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .content-section p {
+        font-size: 1rem;
+    }
+
+    .button-advance {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+
     .container {
-        margin-top: -60px; /* Ajusta para dispositivos menores */
+        margin-top: -60px;
         padding: 20px;
     }
     .header-background {
@@ -248,9 +382,33 @@ input::placeholder {
 }
 
 @media (max-width: 480px) {
+    .main-screen-card {
+        margin: -50px 15px 25px 15px;
+        padding-top: 45px;
+    }
+
+    .logo-container {
+        width: 90px;
+        height: 90px;
+        left: 15px;
+    }
+
+    .logo-image {
+        width: 50px;
+        height: 50px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    .content-section p {
+        font-size: 0.95rem;
+    }
+
     .container {
         padding: 15px;
-        border-radius: 0; /* Sem borda em telas muito pequenas para usar toda largura */
+        border-radius: 0;
         box-shadow: none;
     }
     .logo {
