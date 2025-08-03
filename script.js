@@ -56,6 +56,44 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = value;
     });
 
+    // ===== NOVA: MÁSCARA PARA VALOR (MOEDA) =====
+    document.getElementById('valor').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+        
+        // Se não há valor, limpa o campo
+        if (!value) {
+            e.target.value = '';
+            return;
+        }
+        
+        // Converte para centavos e formata
+        value = (parseInt(value) / 100).toFixed(2);
+        
+        // Substitui ponto por vírgula
+        value = value.replace('.', ',');
+        
+        // Adiciona separadores de milhares
+        value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        
+        // Adiciona o símbolo R\$
+        e.target.value = 'R\$ ' + value;
+    });
+
+    // Remove formatação quando o campo perde o foco para garantir consistência
+    document.getElementById('valor').addEventListener('blur', function(e) {
+        let value = e.target.value;
+        if (value && !value.startsWith('R\$ ')) {
+            // Se o usuário digitou sem R\$, adiciona a formatação
+            let numericValue = value.replace(/\D/g, '');
+            if (numericValue) {
+                numericValue = (parseInt(numericValue) / 100).toFixed(2);
+                numericValue = numericValue.replace('.', ',');
+                numericValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                e.target.value = 'R\$ ' + numericValue;
+            }
+        }
+    });
+
     // ===== VALIDAÇÃO DE CPF =====
     function validarCPF(cpf) {
         // Remove pontos e traços
@@ -85,6 +123,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resto !== parseInt(cpf.charAt(10))) return false;
         
         return true;
+    }
+
+    // ===== FUNÇÃO PARA CONVERTER VALOR PARA NÚMERO =====
+    function converterValorParaNumero(valorFormatado) {
+        if (!valorFormatado) return 0;
+        
+        // Remove R\$, espaços e pontos (separadores de milhares)
+        let valor = valorFormatado.replace(/R\$\s?/g, '').replace(/\./g, '');
+        
+        // Substitui vírgula por ponto para conversão
+        valor = valor.replace(',', '.');
+        
+        return parseFloat(valor) || 0;
     }
 
     // ===== FUNÇÃO PARA MOSTRAR MENSAGENS ELEGANTES =====
@@ -183,6 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
             email: document.getElementById('email').value.trim().toLowerCase(),
             celular: document.getElementById('celular').value,
             celularLimpo: document.getElementById('celular').value.replace(/[^\d]/g, ''), // Celular apenas números
+            
+            // NOVOS CAMPOS ADICIONADOS
+            nomeEvento: document.getElementById('nomeEvento').value.trim(),
+            valor: document.getElementById('valor').value,
+            valorNumerico: converterValorParaNumero(document.getElementById('valor').value),
+            
             dataChegada: document.getElementById('dataChegada').value,
             dataSaida: document.getElementById('dataSaida').value,
             aceitoRegulamento: document.getElementById('aceitoRegulamento').checked,
@@ -226,36 +283,50 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-// Validação de datas
-const hoje = new Date();
-const chegada = new Date(formData.dataChegada);
-const saida = new Date(formData.dataSaida);
+        // VALIDAÇÃO DO NOME DO EVENTO
+        if (formData.nomeEvento.length < 3) {
+            restaurarBotao();
+            mostrarMensagem('O nome do evento deve ter pelo menos 3 caracteres.', 'erro');
+            return;
+        }
 
-// Calcula a data limite (60 dias antes de hoje)
-const dataLimite = new Date();
-dataLimite.setDate(hoje.getDate() - 60);
-dataLimite.setHours(0, 0, 0, 0);
+        // VALIDAÇÃO DO VALOR
+        if (formData.valorNumerico <= 0) {
+            restaurarBotao();
+            mostrarMensagem('Por favor, insira um valor válido maior que zero.', 'erro');
+            return;
+        }
 
-// Normaliza as datas para comparação (remove horário)
-const chegadaNormalizada = new Date(chegada);
-chegadaNormalizada.setHours(0, 0, 0, 0);
+        // Validação de datas
+        const hoje = new Date();
+        const chegada = new Date(formData.dataChegada);
+        const saida = new Date(formData.dataSaida);
 
-const saidaNormalizada = new Date(saida);
-saidaNormalizada.setHours(0, 0, 0, 0);
+        // Calcula a data limite (60 dias antes de hoje)
+        const dataLimite = new Date();
+        dataLimite.setDate(hoje.getDate() - 60);
+        dataLimite.setHours(0, 0, 0, 0);
 
-// Validação: data de chegada não pode ser anterior a 60 dias atrás
-if (chegadaNormalizada < dataLimite) {
-    restaurarBotao();
-    mostrarMensagem('A data de chegada não pode ser anterior a 60 dias da data atual.', 'erro');
-    return;
-}
+        // Normaliza as datas para comparação (remove horário)
+        const chegadaNormalizada = new Date(chegada);
+        chegadaNormalizada.setHours(0, 0, 0, 0);
 
-// Validação: data de saída deve ser posterior à data de chegada
-if (saidaNormalizada <= chegadaNormalizada) {
-    restaurarBotao();
-    mostrarMensagem('A data de saída deve ser posterior à data de chegada.', 'erro');
-    return;
-}
+        const saidaNormalizada = new Date(saida);
+        saidaNormalizada.setHours(0, 0, 0, 0);
+
+        // Validação: data de chegada não pode ser anterior a 60 dias atrás
+        if (chegadaNormalizada < dataLimite) {
+            restaurarBotao();
+            mostrarMensagem('A data de chegada não pode ser anterior a 60 dias da data atual.', 'erro');
+            return;
+        }
+
+        // Validação: data de saída deve ser posterior à data de chegada
+        if (saidaNormalizada <= chegadaNormalizada) {
+            restaurarBotao();
+            mostrarMensagem('A data de saída deve ser posterior à data de chegada.', 'erro');
+            return;
+        }
 
         // ===== ENVIO PARA N8N =====
         console.log('📤 Enviando dados para n8n...', formData);
