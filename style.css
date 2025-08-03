@@ -21,11 +21,9 @@ body {
     display: block;
 }
 
-/* ===== PRIMEIRA TELA: BOAS-VINDAS ===== */
-
-/* Seção de Fundo Superior */
+/* ===== FUNDO COM IMAGEM (PARA AMBAS AS TELAS) ===== */
 .header-background {
-    height: 250px;
+    height: 300px; /* Aumentado para mostrar mais da imagem de fundo */
     background-image: url('images/background.jpg');
     background-size: cover;
     background-position: center center;
@@ -33,24 +31,26 @@ body {
     position: relative;
 }
 
+/* ===== PRIMEIRA TELA: BOAS-VINDAS ===== */
+
 /* Card Principal (Área Branca com Conteúdo) */
 .main-screen-card {
     background-color: white;
     max-width: 800px;
-    margin: -80px auto 40px auto;
+    margin: -50px auto 40px auto; /* Ajustado para descer o card e mostrar mais fundo */
     border-radius: 8px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     position: relative;
-    padding-top: 60px;
+    padding-top: 60px; /* Mantido para dar espaço ao logo que se sobrepõe */
     padding-bottom: 40px;
 }
 
-/* Container do Logo (Círculo Branco) */
+/* Container do Logo (Círculo Branco) - REUTILIZADO PARA AMBAS AS PÁGINAS */
 .logo-container {
     position: absolute;
     top: 0;
-    left: 40px;
-    transform: translateY(-50%);
+    left: 40px; /* Posição à esquerda para a primeira página */
+    transform: translateY(-50%); /* Levanta o logo para metade de sua altura */
     width: 120px;
     height: 120px;
     background-color: white;
@@ -118,37 +118,22 @@ h1 {
 
 /* ===== SEGUNDA TELA: FORMULÁRIO ===== */
 
-/* Seção do Logo */
-.logo-section {
-    position: relative;
-    width: 100%;
-    height: 0;
-    z-index: 2;
-    top: -60px;
+/* Posição específica do logo para a segunda página (centralizado) */
+.form-page-logo {
+    left: 50%; /* Centraliza horizontalmente */
+    transform: translate(-50%, -50%); /* Centraliza e levanta o logo para metade de sua altura */
 }
 
-.logo {
-    display: block;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: #fff;
-    border: 5px solid #fff;
-    margin: 0 auto;
-    object-fit: contain;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transform: translateY(-50%);
-}
-
-/* Container Principal */
+/* Container Principal do Formulário */
 .container {
     max-width: 700px;
-    margin: -60px auto 40px auto;
+    margin: -50px auto 40px auto; /* Ajustado para descer o card e mostrar mais fundo */
     background-color: #fff;
-    padding: 30px;
+    /* padding-top ajustado para dar espaço ao logo que se sobrepõe */
+    padding: 90px 30px 30px 30px; 
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    position: relative;
+    position: relative; /* Essencial para posicionar o logo absolutamente dentro dele */
     z-index: 2;
 }
 
@@ -304,20 +289,21 @@ input::placeholder {
 /* ===== RESPONSIVIDADE ===== */
 
 @media (max-width: 768px) {
+    .header-background {
+        height: 230px; /* Ajustado para telas menores */
+    }
+
     .main-screen-card {
-        margin: -60px 20px 30px 20px;
+        margin: -50px 20px 30px 20px; /* Mantém o ajuste de margem */
         padding-top: 50px;
     }
 
     .logo-container {
         width: 100px;
         height: 100px;
-        top: 0;
-        left: 20px;
-        transform: translateY(-50%);
     }
 
-    .logo-image {
+    .logo-container .logo-image {
         width: 60px;
         height: 60px;
     }
@@ -341,19 +327,10 @@ input::placeholder {
     }
 
     .container {
-        margin-top: -60px;
-        padding: 20px;
-    }
-    .header-background {
-        height: 180px;
-    }
-    .logo-section {
-        top: -40px;
-    }
-    .logo {
-        width: 100px;
-        height: 100px;
-        border-width: 4px;
+        margin-top: -50px; /* Mantém o ajuste de margem */
+        padding-top: 70px; /* Ajuste de padding para o logo em telas menores */
+        padding-left: 20px;
+        padding-right: 20px;
     }
     h2 {
         font-size: 1.1rem;
@@ -382,18 +359,21 @@ input::placeholder {
 }
 
 @media (max-width: 480px) {
+    .header-background {
+        height: 200px; /* Ajustado para telas muito pequenas */
+    }
+
     .main-screen-card {
-        margin: -50px 15px 25px 15px;
+        margin: -40px 15px 25px 15px; /* Mantém o ajuste de margem */
         padding-top: 45px;
     }
 
     .logo-container {
         width: 90px;
         height: 90px;
-        left: 15px;
     }
 
-    .logo-image {
+    .logo-container .logo-image {
         width: 50px;
         height: 50px;
     }
@@ -407,20 +387,12 @@ input::placeholder {
     }
 
     .container {
-        padding: 15px;
+        margin-top: -40px; /* Mantém o ajuste de margem */
+        padding-top: 60px; /* Ajuste de padding para o logo em telas muito pequenas */
+        padding-left: 15px;
+        padding-right: 15px;
         border-radius: 0;
         box-shadow: none;
-    }
-    .logo {
-        width: 80px;
-        height: 80px;
-        border-width: 3px;
-    }
-    .header-background {
-        height: 150px;
-    }
-    .logo-section {
-        top: -30px;
     }
     .back-link {
         margin-bottom: 20px;
