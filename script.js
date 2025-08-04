@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const campoValor = document.getElementById('valor');
         const valorLiquido = extrairValorNumerico(campoValor.value);
         
-        const optgroupCartao = document.getElementById('optgroup-cartao');
         const optgroupPix = document.getElementById('optgroup-pix');
+        const optgroupCartao = document.getElementById('optgroup-cartao');
         
         // Limpa opções existentes
         optgroupCartao.innerHTML = '';
