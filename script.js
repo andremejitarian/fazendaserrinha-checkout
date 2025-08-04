@@ -361,11 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
             gerarOpcoesDropdown(); 
             atualizarValorCalculado();
         }, 100);
-        
-        // Mostra mensagem de sucesso
-        setTimeout(() => {
-            mostrarMensagem(`�� ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
-        }, 500);
     }
     
     // Função auxiliar para formatar datas
