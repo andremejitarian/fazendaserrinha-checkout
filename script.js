@@ -162,56 +162,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Função para atualizar o valor calculado
-    function atualizarValorCalculado() {
-        const campoValor = document.getElementById('valor');
-        const campoFormaPagamento = document.getElementById('formaPagamento');
-        const campoValorCalculado = document.getElementById('valorCalculado');
-        const campoDescricaoDisplay = document.getElementById('formaPagamentoDescricaoDisplay'); // <-- NOVO ELEMENTO AQUI
+    // Função para atualizar o valor calculado E a descrição
+function atualizarValorCalculado() {
+    const campoValor = document.getElementById('valor');
+    const campoFormaPagamento = document.getElementById('formaPagamento');
+    const campoValorCalculado = document.getElementById('valorCalculado');
+    const campoDescricaoDisplay = document.getElementById('formaPagamentoDescricaoDisplay'); // <-- NOVO ELEMENTO AQUI
 
     if (!campoValor || !campoFormaPagamento || !campoValorCalculado || !campoDescricaoDisplay) {
         console.warn('⚠️ Campos necessários não encontrados');
         return;
     }
-        
-        const valorLiquido = extrairValorNumerico(campoValor.value);
-        const formaPagamento = campoFormaPagamento.value;
-        
-        console.log(`�� Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
-        
-        // A linha 'gerarOpcoesDropdown()' FOI REMOVIDA DAQUI para evitar que o dropdown seja recarregado
-        // durante a seleção, o que impedia a seleção da opção.
-        
-        if (!formaPagamento) {
-            campoValorCalculado.value = '';
-            campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
-            return;
-        }
-        
+    
+    const valorLiquido = extrairValorNumerico(campoValor.value);
+    // Pega a opção que está atualmente selecionada no dropdown
+    const selectedOption = campoFormaPagamento.options[campoFormaPagamento.selectedIndex]; 
+    
+    // Limpa os campos se não houver seleção ou valor líquido
+    campoValorCalculado.value = '';
+    campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
+    campoDescricaoDisplay.textContent = ''; // Limpa a descrição
+    
+    if (!selectedOption || !selectedOption.value || valorLiquido <= 0) {
+        // Se não há opção selecionada ou valor líquido é inválido, sai.
         if (valorLiquido <= 0) {
-            campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Informe um valor válido';
-            return;
         }
-        
-        // Parse da forma de pagamento selecionada
-        const [tipo, parcelas] = formaPagamento.split('_');
-        const calculo = calcularValorComTaxas(valorLiquido, tipo, parseInt(parcelas));
-        
-        if (calculo) {
-            campoValorCalculado.value = formatarParaMoeda(calculo.total);
-            campoValorCalculado.placeholder = '';
-            
-            // Mostra diferença se houver taxa
-            if (calculo.total > valorLiquido) {
-                const diferenca = calculo.total - valorLiquido;
-                console.log(`💡 Taxa aplicada: ${formatarParaMoeda(diferenca)}`);
-            }
-        } else {
-            campoValorCalculado.value = '';
-            campoValorCalculado.placeholder = 'Erro no cálculo';
-        }
+        return;
     }
+    
+    const formaPagamentoValue = selectedOption.value; // Ex: "cartao_1", "pix_2"
+    const formaPagamentoText = selectedOption.textContent; // Ex: "À vista no pix - R\$ 1.010,20"
+    
+    console.log(`�� Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamentoValue}`);
+    
+    // Parse da forma de pagamento selecionada
+    const [tipo, parcelas] = formaPagamentoValue.split('_');
+    const calculo = calcularValorComTaxas(valorLiquido, tipo, parseInt(parcelas));
+    
+    if (calculo) {
+        // Mantém o input 'valorCalculado' com apenas o valor formatado
+        campoValorCalculado.value = formatarParaMoeda(calculo.total);
+        campoValorCalculado.placeholder = '';
+        
+        // Define o texto descritivo completo no novo elemento
+        campoDescricaoDisplay.textContent = formaPagamentoText; 
+        
+        // Mostra diferença se houver taxa
+        if (calculo.total > valorLiquido) {
+            const diferenca = calculo.total - valorLiquido;
+            console.log(`💡 Taxa aplicada: ${formatarParaMoeda(diferenca)}`);
+        }
+    } else {
+        campoValorCalculado.value = '';
+        campoValorCalculado.placeholder = 'Erro no cálculo';
+        campoDescricaoDisplay.textContent = 'Erro ao carregar descrição';
+    }
+}
 
     // Função para obter dados da forma de pagamento selecionada
     function obterDadosFormaPagamento(formaPagamento) {
