@@ -71,10 +71,10 @@
                 <section class="form-section">
                     <h2>SOBRE A ESTADIA</h2>
 
-    <div class="form-group">
-        <label for="nomeEvento">Nome do Evento *</label>
-        <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Digite o nome do evento" required>
-    </div>
+                    <div class="form-group">
+                        <label for="nomeEvento">Nome do Evento *</label>
+                        <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Digite o nome do evento" required>
+                    </div>
 
                     <div class="form-group">
                         <label for="dataChegada">Data de Chegada *</label>
@@ -86,10 +86,37 @@
                         <input type="date" id="dataSaida" name="dataSaida" required>
                     </div>
 
-    <div class="form-group">
-        <label for="valor">Valor (R\$) *</label>
-        <input type="text" id="valor" name="valor" placeholder="Ex: 150,00" required>
-    </div>
+                    <div class="form-group">
+                        <label for="valor">Valor Líquido Desejado (R\$) *</label>
+                        <input type="text" id="valor" name="valor" placeholder="Ex: 150,00" required>
+                        <small class="campo-info">Este é o valor que você deseja receber (sem taxas)</small>
+                    </div>
+
+                    <!-- NOVO: Campo Forma de Pagamento -->
+                    <div class="form-group">
+                        <label for="formaPagamento">Forma de Pagamento *</label>
+                        <select id="formaPagamento" name="formaPagamento" required>
+                            <option value="">Selecione a forma de pagamento</option>
+                            <optgroup label="💳 Cartão de Crédito">
+                                <option value="cc_vista">À vista (R\$ 0,49 + 3,99%)</option>
+                                <option value="cc_2_6">2 a 6 parcelas (R\$ 0,49 + 4,49%)</option>
+                                <option value="cc_7_12">7 a 12 parcelas (R\$ 0,49 + 4,99%)</option>
+                                <option value="cc_13_21">13 a 21 parcelas (R\$ 0,49 + 5,29%)</option>
+                            </optgroup>
+                            <optgroup label="📱 PIX">
+                                <option value="pix_vista">À vista (sem acréscimo)</option>
+                                <option value="pix_2_3">2 a 3 parcelas (R\$ 1,99 + 2%)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- NOVO: Campo Valor Calculado -->
+                    <div class="form-group">
+                        <label for="valorCalculado">Valor Total a Pagar</label>
+                        <input type="text" id="valorCalculado" name="valorCalculado" readonly 
+                               placeholder="Selecione uma forma de pagamento">
+                        <small class="campo-info">Este é o valor que o cliente pagará (incluindo taxas)</small>
+                    </div>
 
                     <p class="legal-text">Nossa forma de funcionamento, os serviços oferecidos e os acordos de convivência estão organizados no <a href="#" ><strong>Regulamento Interno</strong></a>. Clique <a href="https://drive.google.com/file/d/1-jsgvr4t1Z2iW7J_s9Ja4SPIZVOC90TF/view" >aqui</a> para ler o documento e valide-o abaixo.</p>
 
