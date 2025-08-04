@@ -34,88 +34,97 @@ document.addEventListener('DOMContentLoaded', () => {
         return parametros;
     }
     
-    // Função para preencher os campos do formulário
-    function preencherCamposViaURL() {
-        const parametros = obterParametrosURL();
-        
-        // Se não há parâmetros, não faz nada
-        if (Object.keys(parametros).length === 0) {
-            console.log('ℹ️ Nenhum parâmetro encontrado na URL');
-            return;
-        }
-        
-        console.log('🔄 Preenchendo campos automaticamente...');
-        
-        // Preenche cada campo encontrado
-        Object.entries(parametros).forEach(([campo, valor]) => {
-            const elemento = document.getElementById(campo);
-            
-            if (elemento) {
-                // Decodifica o valor (para caracteres especiais)
-                const valorDecodificado = decodeURIComponent(valor);
-                
-                // Tratamento especial para diferentes tipos de campo
-                switch (campo) {
-                    case 'cpf':
-                        // Remove formatação e aplica máscara
-                        const cpfLimpo = valorDecodificado.replace(/\D/g, '');
-                        elemento.value = cpfLimpo;
-                        // Dispara evento para aplicar máscara
-                        elemento.dispatchEvent(new Event('input'));
-                        break;
-                        
-                    case 'celular':
-                        // Remove formatação e aplica máscara
-                        const celularLimpo = valorDecodificado.replace(/\D/g, '');
-                        elemento.value = celularLimpo;
-                        // Dispara evento para aplicar máscara
-                        elemento.dispatchEvent(new Event('input'));
-                        break;
-                        
-                    case 'valor':
-                        // Se o valor não tem R\$, adiciona formatação
-                        if (!valorDecodificado.includes('R\$')) {
-                            // Assume que o valor está em formato numérico (ex: 150.00 ou 150)
-                            const valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
-                            const valorCentavos = Math.round(valorNumerico * 100);
-                            elemento.value = valorCentavos.toString();
-                            // Dispara evento para aplicar máscara
-                            elemento.dispatchEvent(new Event('input'));
-                        } else {
-                            elemento.value = valorDecodificado;
-                        }
-                        break;
-                        
-                    case 'dataChegada':
-                    case 'dataSaida':
-                        // Converte diferentes formatos de data para YYYY-MM-DD
-                        const dataFormatada = formatarDataParaInput(valorDecodificado);
-                        if (dataFormatada) {
-                            elemento.value = dataFormatada;
-                        }
-                        break;
-                        
-                    default:
-                        // Para campos de texto simples
-                        elemento.value = valorDecodificado;
-                        break;
-                }
-                
-                console.log(`✅ Campo '${campo}' preenchido com: '${valorDecodificado}'`);
-                
-                // Adiciona uma classe visual para indicar preenchimento automático
-                elemento.classList.add('preenchido-automaticamente');
-                
-            } else {
-                console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
-            }
-        });
-        
-        // Mostra mensagem de sucesso
-        setTimeout(() => {
-            mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
-        }, 500);
+// Função para preencher os campos do formulário
+function preencherCamposViaURL() {
+    const parametros = obterParametrosURL();
+    
+    // Se não há parâmetros, não faz nada
+    if (Object.keys(parametros).length === 0) {
+        console.log('ℹ️ Nenhum parâmetro encontrado na URL');
+        return;
     }
+    
+    console.log('🔄 Preenchendo campos automaticamente...');
+    
+    // Preenche cada campo encontrado
+    Object.entries(parametros).forEach(([campo, valor]) => {
+        const elemento = document.getElementById(campo);
+        
+        if (elemento) {
+            // Decodifica o valor (para caracteres especiais)
+            const valorDecodificado = decodeURIComponent(valor);
+            
+            // Tratamento especial para diferentes tipos de campo
+            switch (campo) {
+                case 'cpf':
+                    // Remove formatação e aplica máscara
+                    const cpfLimpo = valorDecodificado.replace(/\D/g, '');
+                    elemento.value = cpfLimpo;
+                    // Dispara evento para aplicar máscara
+                    elemento.dispatchEvent(new Event('input'));
+                    break;
+                    
+                case 'celular':
+                    // Remove formatação e aplica máscara
+                    const celularLimpo = valorDecodificado.replace(/\D/g, '');
+                    elemento.value = celularLimpo;
+                    // Dispara evento para aplicar máscara
+                    elemento.dispatchEvent(new Event('input'));
+                    break;
+                    
+                case 'valor':
+                    console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
+                    
+                    // Se o valor já tem R\$, usa diretamente
+                    if (valorDecodificado.includes('R\$')) {
+                        elemento.value = valorDecodificado;
+                        console.log(`✅ Valor com R\$ aplicado diretamente: ${valorDecodificado}`);
+                    } else {
+                        // Converte valor numérico para formato monetário brasileiro
+                        let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
+                        console.log(`🔢 Valor numérico extraído: ${valorNumerico}`);
+                        
+                        // Formata para moeda brasileira
+                        const valorFormatado = valorNumerico.toFixed(2)
+                            .replace('.', ',')
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        
+                        const valorFinal = 'R\$ ' + valorFormatado;
+                        elemento.value = valorFinal;
+                        console.log(`💰 Valor formatado final: ${valorFinal}`);
+                    }
+                    break;
+                    
+                case 'dataChegada':
+                case 'dataSaida':
+                    // Converte diferentes formatos de data para YYYY-MM-DD
+                    const dataFormatada = formatarDataParaInput(valorDecodificado);
+                    if (dataFormatada) {
+                        elemento.value = dataFormatada;
+                    }
+                    break;
+                    
+                default:
+                    // Para campos de texto simples
+                    elemento.value = valorDecodificado;
+                    break;
+            }
+            
+            console.log(`✅ Campo '${campo}' preenchido com: '${valorDecodificado}'`);
+            
+            // Adiciona uma classe visual para indicar preenchimento automático
+            elemento.classList.add('preenchido-automaticamente');
+            
+        } else {
+            console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
+        }
+    });
+    
+    // Mostra mensagem de sucesso
+    setTimeout(() => {
+        mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
+    }, 500);
+}
     
     // Função auxiliar para formatar datas
     function formatarDataParaInput(dataString) {
