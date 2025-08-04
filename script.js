@@ -44,8 +44,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Fórmula: V_bruto = (V_liquido + T_fixa) / (1 - P_percentual)
-        const valorBruto = (valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual);
+        const valorBrutoOriginal = (valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual);
         
+        // --- INÍCIO DA NOVA CORREÇÃO DE ARREDONDAMENTO (todas as parcelas arredondadas para cima) ---
+        
+        // 1. Calcular o valor de cada parcela sem arredondamento
+        const valorPorParcelaRaw = valorBrutoOriginal / parcelas;
+        
+        // 2. Arredondar o valor de CADA parcela para cima, para 2 casas decimais
+        // Ex: 185.61857... -> 185.62
+        const valorPorParcela = Math.ceil(valorPorParcelaRaw * 100) / 100;
+        
+        // 3. O valor total agora será o valor da parcela arredondado para cima multiplicado pelo número de parcelas
+        // Isso garante que (parcela * quantidade) = total exibido
+        const valorBrutoTotalCorrigido = parseFloat((valorPorParcela * parcelas).toFixed(2));
+        
+        // --- FIM DA NOVA CORREÇÃO DE ARREDONDAMENTO ---
+
         console.log(`💰 Cálculo de taxa:`, {
             valorLiquido: valorNumerico,
             tipo: tipo,
@@ -53,13 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
             formaPagamento: taxa.nome,
             taxaFixa: taxa.taxaFixa,
             taxaPercentual: (taxa.taxaPercentual * 100).toFixed(2) + '%',
-            valorBruto: valorBruto.toFixed(2),
-            valorPorParcela: (valorBruto / parcelas).toFixed(2)
+            valorBrutoOriginal: valorBrutoOriginal.toFixed(2), // Valor bruto calculado antes de ajustar parcelas
+            valorPorParcelaExibido: valorPorParcela.toFixed(2), // Valor de cada parcela exibido (arredondado para cima)
+            valorBrutoTotalCorrigido: valorBrutoTotalCorrigido.toFixed(2) // O novo valor total para exibição
         });
         
         return {
-            total: valorBruto,
-            porParcela: valorBruto / parcelas,
+            total: valorBrutoTotalCorrigido, // O valor total agora reflete a soma das parcelas arredondadas para cima
+            porParcela: valorPorParcela, // O valor de cada parcela (arredondado para cima)
             taxa: taxa
         };
     }
@@ -155,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const valorLiquido = extrairValorNumerico(campoValor.value);
         const formaPagamento = campoFormaPagamento.value;
         
-        console.log(`🔄 Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
+        console.log(`�� Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
         
         // A linha 'gerarOpcoesDropdown()' FOI REMOVIDA DAQUI para evitar que o dropdown seja recarregado
         // durante a seleção, o que impedia a seleção da opção.
@@ -298,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             const valorFinal = 'R\$ ' + valorFormatado;
                             elemento.value = valorFinal;
-                            console.log(`�� Valor formatado final: ${valorFinal}`);
+                            console.log(`💰 Valor formatado final: ${valorFinal}`);
                         }
                         break;
                         
@@ -347,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Mostra mensagem de sucesso
         setTimeout(() => {
-            mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
+            mostrarMensagem(`�� ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
         }, 500);
     }
     
@@ -726,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.innerHTML = '<span class="loading-spinner"></span> Enviando dados...';
 
         // Envio para N8N
-        console.log('📤 Enviando dados para n8n...', formData);
+        console.log('�� Enviando dados para n8n...', formData);
         const resultado = await enviarParaN8N(formData);
 
         if (resultado.success) {
