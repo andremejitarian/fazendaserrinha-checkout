@@ -167,11 +167,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const campoValor = document.getElementById('valor');
         const campoFormaPagamento = document.getElementById('formaPagamento');
         const campoValorCalculado = document.getElementById('valorCalculado');
-        
-        if (!campoValor || !campoFormaPagamento || !campoValorCalculado) {
-            console.warn('⚠️ Campos necessários não encontrados');
-            return;
-        }
+        const campoDescricaoDisplay = document.getElementById('formaPagamentoDescricaoDisplay'); // <-- NOVO ELEMENTO AQUI
+
+    if (!campoValor || !campoFormaPagamento || !campoValorCalculado || !campoDescricaoDisplay) {
+        console.warn('⚠️ Campos necessários não encontrados');
+        return;
+    }
         
         const valorLiquido = extrairValorNumerico(campoValor.value);
         const formaPagamento = campoFormaPagamento.value;
