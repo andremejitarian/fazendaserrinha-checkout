@@ -4,6 +4,164 @@ document.addEventListener('DOMContentLoaded', () => {
     // URL da webhook do n8n (apenas para envio final)
     const WEBHOOK_URL = 'https://criadordigital-n8n-editor.kttqgl.easypanel.host/webhook-test/91479e0c-d686-42dd-a381-c3e44d50df7e';
 
+// ===== NOVA: PREENCHIMENTO VIA URL =====
+    
+    // Função para extrair parâmetros da URL
+    function obterParametrosURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const parametros = {};
+        
+        // Lista de parâmetros suportados e seus campos correspondentes
+        const mapeamentoParametros = {
+            'nome': 'nomeCompleto',
+            'cpf': 'cpf',
+            'email': 'email',
+            'celular': 'celular',
+            'evento': 'nomeEvento',
+            'valor': 'valor',
+            'chegada': 'dataChegada',
+            'saida': 'dataSaida'
+        };
+        
+        // Extrai todos os parâmetros da URL
+        for (const [parametroURL, campoFormulario] of Object.entries(mapeamentoParametros)) {
+            if (urlParams.has(parametroURL)) {
+                parametros[campoFormulario] = urlParams.get(parametroURL);
+            }
+        }
+        
+        console.log('📋 Parâmetros encontrados na URL:', parametros);
+        return parametros;
+    }
+    
+    // Função para preencher os campos do formulário
+    function preencherCamposViaURL() {
+        const parametros = obterParametrosURL();
+        
+        // Se não há parâmetros, não faz nada
+        if (Object.keys(parametros).length === 0) {
+            console.log('ℹ️ Nenhum parâmetro encontrado na URL');
+            return;
+        }
+        
+        console.log('🔄 Preenchendo campos automaticamente...');
+        
+        // Preenche cada campo encontrado
+        Object.entries(parametros).forEach(([campo, valor]) => {
+            const elemento = document.getElementById(campo);
+            
+            if (elemento) {
+                // Decodifica o valor (para caracteres especiais)
+                const valorDecodificado = decodeURIComponent(valor);
+                
+                // Tratamento especial para diferentes tipos de campo
+                switch (campo) {
+                    case 'cpf':
+                        // Remove formatação e aplica máscara
+                        const cpfLimpo = valorDecodificado.replace(/\D/g, '');
+                        elemento.value = cpfLimpo;
+                        // Dispara evento para aplicar máscara
+                        elemento.dispatchEvent(new Event('input'));
+                        break;
+                        
+                    case 'celular':
+                        // Remove formatação e aplica máscara
+                        const celularLimpo = valorDecodificado.replace(/\D/g, '');
+                        elemento.value = celularLimpo;
+                        // Dispara evento para aplicar máscara
+                        elemento.dispatchEvent(new Event('input'));
+                        break;
+                        
+                    case 'valor':
+                        // Se o valor não tem R\$, adiciona formatação
+                        if (!valorDecodificado.includes('R\$')) {
+                            // Assume que o valor está em formato numérico (ex: 150.00 ou 150)
+                            const valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
+                            const valorCentavos = Math.round(valorNumerico * 100);
+                            elemento.value = valorCentavos.toString();
+                            // Dispara evento para aplicar máscara
+                            elemento.dispatchEvent(new Event('input'));
+                        } else {
+                            elemento.value = valorDecodificado;
+                        }
+                        break;
+                        
+                    case 'dataChegada':
+                    case 'dataSaida':
+                        // Converte diferentes formatos de data para YYYY-MM-DD
+                        const dataFormatada = formatarDataParaInput(valorDecodificado);
+                        if (dataFormatada) {
+                            elemento.value = dataFormatada;
+                        }
+                        break;
+                        
+                    default:
+                        // Para campos de texto simples
+                        elemento.value = valorDecodificado;
+                        break;
+                }
+                
+                console.log(`✅ Campo '${campo}' preenchido com: '${valorDecodificado}'`);
+                
+                // Adiciona uma classe visual para indicar preenchimento automático
+                elemento.classList.add('preenchido-automaticamente');
+                
+            } else {
+                console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
+            }
+        });
+        
+        // Mostra mensagem de sucesso
+        setTimeout(() => {
+            mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
+        }, 500);
+    }
+    
+    // Função auxiliar para formatar datas
+    function formatarDataParaInput(dataString) {
+        try {
+            // Tenta diferentes formatos de data
+            let data;
+            
+            // Formato: DD/MM/YYYY ou DD-MM-YYYY
+            if (dataString.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/)) {
+                const partes = dataString.split(/[\/\-]/);
+                data = new Date(partes[2], partes[1] - 1, partes[0]);
+            }
+            // Formato: YYYY-MM-DD (já correto)
+            else if (dataString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return dataString;
+            }
+            // Formato: DD/MM/YY
+            else if (dataString.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{2}$/)) {
+                const partes = dataString.split(/[\/\-]/);
+                const ano = parseInt(partes[2]) + (parseInt(partes[2]) > 50 ? 1900 : 2000);
+                data = new Date(ano, partes[1] - 1, partes[0]);
+            }
+            else {
+                // Tenta parsing direto
+                data = new Date(dataString);
+            }
+            
+            // Verifica se a data é válida
+            if (isNaN(data.getTime())) {
+                console.warn(`⚠️ Data inválida: ${dataString}`);
+                return null;
+            }
+            
+            // Retorna no formato YYYY-MM-DD
+            return data.toISOString().split('T')[0];
+            
+        } catch (error) {
+            console.warn(`⚠️ Erro ao formatar data '${dataString}':`, error);
+            return null;
+        }
+    }
+    
+    // Executa o preenchimento automático quando a página carrega
+    preencherCamposViaURL();
+
+
     // Função para mostrar a tela do formulário
     window.showFormScreen = function() {
         document.getElementById('welcomeScreen').classList.remove('active');
