@@ -599,11 +599,3 @@ input[readonly] {
     border-color: #28a745 !important;
     box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
 }
-
-/* Descricao do pagamento */
-.payment-description {
-    margin-top: 5px;
-    font-size: 0.9em;
-    color: #555; /* Um cinza mais escuro */
-    font-weight: bold;
-}
