@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('estadiaForm');
-    
+
     // URL da webhook do n8n (apenas para envio final)
     const WEBHOOK_URL = 'https://criadordigital-n8n-editor.kttqgl.easypanel.host/webhook-test/91479e0c-d686-42dd-a381-c3e44d50df7e';
 
     // ===== CONFIGURAÇÃO DAS TAXAS DE PAGAMENTO =====
-    
+
     const taxasPagamento = {
         cartao: {
             1: { nome: 'Cartão - À vista', taxaFixa: 0.49, taxaPercentual: 0.0399 },
@@ -29,36 +29,36 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===== FUNÇÕES DE CÁLCULO DE TAXAS =====
-    
+
     // Função para calcular o valor com taxas
     function calcularValorComTaxas(valorLiquido, tipo, parcelas) {
         if (!tipo || !parcelas || !taxasPagamento[tipo] || !taxasPagamento[tipo][parcelas]) {
             return null;
         }
-        
+
         const taxa = taxasPagamento[tipo][parcelas];
         const valorNumerico = parseFloat(valorLiquido) || 0;
-        
+
         if (valorNumerico <= 0) {
             return null;
         }
-        
+
         // Fórmula: V_bruto = (V_liquido + T_fixa) / (1 - P_percentual)
         const valorBrutoOriginal = (valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual);
-        
+
         // --- INÍCIO DA NOVA CORREÇÃO DE ARREDONDAMENTO (todas as parcelas arredondadas para cima) ---
-        
+
         // 1. Calcular o valor de cada parcela sem arredondamento
         const valorPorParcelaRaw = valorBrutoOriginal / parcelas;
-        
+
         // 2. Arredondar o valor de CADA parcela para cima, para 2 casas decimais
         // Ex: 185.61857... -> 185.62
         const valorPorParcela = Math.ceil(valorPorParcelaRaw * 100) / 100;
-        
+
         // 3. O valor total agora será o valor da parcela arredondado para cima multiplicado pelo número de parcelas
         // Isso garante que (parcela * quantidade) = total exibido
         const valorBrutoTotalCorrigido = parseFloat((valorPorParcela * parcelas).toFixed(2));
-        
+
         // --- FIM DA NOVA CORREÇÃO DE ARREDONDAMENTO ---
 
         console.log(`💰 Cálculo de taxa:`, {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             valorPorParcelaExibido: valorPorParcela.toFixed(2), // Valor de cada parcela exibido (arredondado para cima)
             valorBrutoTotalCorrigido: valorBrutoTotalCorrigido.toFixed(2) // O novo valor total para exibição
         });
-        
+
         return {
             total: valorBrutoTotalCorrigido, // O valor total agora reflete a soma das parcelas arredondadas para cima
             porParcela: valorPorParcela, // O valor de cada parcela (arredondado para cima)
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função para formatar valor para moeda
     function formatarParaMoeda(valor) {
         if (!valor || isNaN(valor)) return '';
-        
+
         return valor.toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL'
@@ -93,36 +93,45 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função para extrair valor numérico do campo formatado
     function extrairValorNumerico(valorFormatado) {
         if (!valorFormatado) return 0;
-        
+
         // Remove R\$, espaços, pontos (milhares) e converte vírgula para ponto
         let valor = valorFormatado
             .replace(/R\$\s?/g, '')
             .replace(/\./g, '')
             .replace(',', '.');
-        
+
         return parseFloat(valor) || 0;
+    }
+
+    // NOVO: Função auxiliar para obter o nome amigável do tipo de pagamento
+    function getPaymentTypeName(tipo) {
+        if (tipo === 'cartao') {
+            return 'Cartão';
+        } else if (tipo === 'pix') {
+            return 'PIX';
+        }
+        return ''; // Retorna vazio se o tipo não for reconhecido
     }
 
     // Função para gerar opções do dropdown dinamicamente
     function gerarOpcoesDropdown() {
         const campoValor = document.getElementById('valor');
         const valorLiquido = extrairValorNumerico(campoValor.value);
-        
-        const optgroupCartao = document.getElementById('optgroup-cartao'); 
+
+        const optgroupCartao = document.getElementById('optgroup-cartao');
         const optgroupPix = document.getElementById('optgroup-pix');
 
-        
         // Limpa opções existentes
         optgroupCartao.innerHTML = '';
         optgroupPix.innerHTML = '';
-        
+
         if (valorLiquido <= 0) {
             // Se não há valor, mostra opções genéricas
             optgroupCartao.innerHTML = '<option value="" disabled selected>Informe um valor primeiro</option>';
             optgroupPix.innerHTML = '<option value="" disabled>Informe um valor primeiro</option>';
             return;
         }
-        
+
         // Gera opções para Cartão
         for (let parcelas = 1; parcelas <= 12; parcelas++) {
             const calculo = calcularValorComTaxas(valorLiquido, 'cartao', parcelas);
@@ -130,18 +139,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const option = document.createElement('option');
                 option.value = `cartao_${parcelas}`;
 
-                const tipoPagamento = getPaymentTypeName('cartao'); // "cartão"
-                
+                const tipoPagamento = getPaymentTypeName('cartao'); // "Cartão"
                 if (parcelas === 1) {
                     option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
                 } else {
                     option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
                 }
-                
+
                 optgroupCartao.appendChild(option);
             }
         }
-        
+
         // Gera opções para PIX
         for (let parcelas = 1; parcelas <= 3; parcelas++) {
             const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
@@ -149,84 +157,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 const option = document.createElement('option');
                 option.value = `pix_${parcelas}`;
 
-                const tipoPagamento = getPaymentTypeName('pix'); // "pix"
-                
+                const tipoPagamento = getPaymentTypeName('pix'); // "PIX"
                 if (parcelas === 1) {
                     option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
                 } else {
                     option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
                 }
-                
+
                 optgroupPix.appendChild(option);
             }
         }
     }
 
-    // Função para atualizar o valor calculado E a descrição
-function atualizarValorCalculado() {
-    const campoValor = document.getElementById('valor');
-    const campoFormaPagamento = document.getElementById('formaPagamento');
-    const campoValorCalculado = document.getElementById('valorCalculado');
-    const campoDescricaoDisplay = document.getElementById('formaPagamentoDescricaoDisplay'); // <-- NOVO ELEMENTO AQUI
+    // Função para atualizar o valor calculado
+    function atualizarValorCalculado() {
+        const campoValor = document.getElementById('valor');
+        const campoFormaPagamento = document.getElementById('formaPagamento');
+        const campoValorCalculado = document.getElementById('valorCalculado');
 
-    if (!campoValor || !campoFormaPagamento || !campoValorCalculado || !campoDescricaoDisplay) {
-        console.warn('⚠️ Campos necessários não encontrados');
-        return;
-    }
-    
-    const valorLiquido = extrairValorNumerico(campoValor.value);
-    // Pega a opção que está atualmente selecionada no dropdown
-    const selectedOption = campoFormaPagamento.options[campoFormaPagamento.selectedIndex]; 
-    
-    // Limpa os campos se não houver seleção ou valor líquido
-    campoValorCalculado.value = '';
-    campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
-    campoDescricaoDisplay.textContent = ''; // Limpa a descrição
-    
-    if (!selectedOption || !selectedOption.value || valorLiquido <= 0) {
-        // Se não há opção selecionada ou valor líquido é inválido, sai.
+        if (!campoValor || !campoFormaPagamento || !campoValorCalculado) {
+            console.warn('⚠️ Campos necessários não encontrados');
+            return;
+        }
+
+        const valorLiquido = extrairValorNumerico(campoValor.value);
+        const formaPagamento = campoFormaPagamento.value;
+
+        console.log(`🔄 Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
+
+        // A linha 'gerarOpcoesDropdown()' FOI REMOVIDA DAQUI para evitar que o dropdown seja recarregado
+        // durante a seleção, o que impedia a seleção da opção.
+
+        if (!formaPagamento) {
+            campoValorCalculado.value = '';
+            campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
+            return;
+        }
+
         if (valorLiquido <= 0) {
+            campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Informe um valor válido';
+            return;
         }
-        return;
-    }
-    
-    const formaPagamentoValue = selectedOption.value; // Ex: "cartao_1", "pix_2"
-    const formaPagamentoText = selectedOption.textContent; // Ex: "À vista no pix - R\$ 1.010,20"
-    
-    console.log(`�� Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamentoValue}`);
-    
-    // Parse da forma de pagamento selecionada
-    const [tipo, parcelas] = formaPagamentoValue.split('_');
-    const calculo = calcularValorComTaxas(valorLiquido, tipo, parseInt(parcelas));
-    
-    if (calculo) {
-        // Mantém o input 'valorCalculado' com apenas o valor formatado
-        campoValorCalculado.value = formatarParaMoeda(calculo.total);
-        campoValorCalculado.placeholder = '';
-        
-        // Define o texto descritivo completo no novo elemento
-        campoDescricaoDisplay.textContent = formaPagamentoText; 
-        
-        // Mostra diferença se houver taxa
-        if (calculo.total > valorLiquido) {
-            const diferenca = calculo.total - valorLiquido;
-            console.log(`💡 Taxa aplicada: ${formatarParaMoeda(diferenca)}`);
+
+        // Parse da forma de pagamento selecionada
+        const [tipo, parcelas] = formaPagamento.split('_');
+        const calculo = calcularValorComTaxas(valorLiquido, tipo, parseInt(parcelas));
+
+        if (calculo) {
+            campoValorCalculado.value = formatarParaMoeda(calculo.total);
+            campoValorCalculado.placeholder = '';
+
+            // Mostra diferença se houver taxa
+            if (calculo.total > valorLiquido) {
+                const diferenca = calculo.total - valorLiquido;
+                console.log(`💡 Taxa aplicada: ${formatarParaMoeda(diferenca)}`);
+            }
+        } else {
+            campoValorCalculado.value = '';
+            campoValorCalculado.placeholder = 'Erro no cálculo';
         }
-    } else {
-        campoValorCalculado.value = '';
-        campoValorCalculado.placeholder = 'Erro no cálculo';
-        campoDescricaoDisplay.textContent = 'Erro ao carregar descrição';
     }
-}
 
     // Função para obter dados da forma de pagamento selecionada
     function obterDadosFormaPagamento(formaPagamento) {
         if (!formaPagamento) return null;
-        
+
         const [tipo, parcelas] = formaPagamento.split('_');
         const parcelasNum = parseInt(parcelas);
-        
+
         if (taxasPagamento[tipo] && taxasPagamento[tipo][parcelasNum]) {
             return {
                 tipo: tipo,
@@ -235,17 +234,17 @@ function atualizarValorCalculado() {
                 taxa: taxasPagamento[tipo][parcelasNum]
             };
         }
-        
+
         return null;
     }
 
     // ===== PREENCHIMENTO VIA URL =====
-    
+
     // Função para extrair parâmetros da URL
     function obterParametrosURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const parametros = {};
-        
+
         // Lista de parâmetros suportados e seus campos correspondentes
         const mapeamentoParametros = {
             'nome': 'nomeCompleto',
@@ -258,38 +257,38 @@ function atualizarValorCalculado() {
             'chegada': 'dataChegada',
             'saida': 'dataSaida'
         };
-        
+
         // Extrai todos os parâmetros da URL
         for (const [parametroURL, campoFormulario] of Object.entries(mapeamentoParametros)) {
             if (urlParams.has(parametroURL)) {
                 parametros[campoFormulario] = urlParams.get(parametroURL);
             }
         }
-        
-        console.log('📋 Parâmetros encontrados na URL:', parametros);
+
+        console.log('�� Parâmetros encontrados na URL:', parametros);
         return parametros;
     }
-    
+
     // Função para preencher os campos do formulário
     function preencherCamposViaURL() {
         const parametros = obterParametrosURL();
-        
+
         // Se não há parâmetros, não faz nada
         if (Object.keys(parametros).length === 0) {
             console.log('ℹ️ Nenhum parâmetro encontrado na URL');
             return;
         }
-        
-        console.log('�� Preenchendo campos automaticamente...');
-        
+
+        console.log('🚀 Preenchendo campos automaticamente...');
+
         // Preenche cada campo encontrado
         Object.entries(parametros).forEach(([campo, valor]) => {
             const elemento = document.getElementById(campo);
-            
+
             if (elemento) {
                 // Decodifica o valor (para caracteres especiais)
                 const valorDecodificado = decodeURIComponent(valor);
-                
+
                 // Tratamento especial para diferentes tipos de campo
                 switch (campo) {
                     case 'cpf':
@@ -299,7 +298,7 @@ function atualizarValorCalculado() {
                         // Dispara evento para aplicar máscara
                         elemento.dispatchEvent(new Event('input'));
                         break;
-                        
+
                     case 'celular':
                         // Remove formatação e aplica máscara
                         const celularLimpo = valorDecodificado.replace(/\D/g, '');
@@ -307,10 +306,10 @@ function atualizarValorCalculado() {
                         // Dispara evento para aplicar máscara
                         elemento.dispatchEvent(new Event('input'));
                         break;
-                        
+
                     case 'valor':
                         console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
-                        
+
                         // Se o valor já tem R\$, usa diretamente
                         if (valorDecodificado.includes('R\$')) {
                             elemento.value = valorDecodificado;
@@ -318,19 +317,19 @@ function atualizarValorCalculado() {
                         } else {
                             // Converte valor numérico para formato monetário brasileiro
                             let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
-                            console.log(`🔢 Valor numérico extraído: ${valorNumerico}`);
-                            
+                            console.log(`�� Valor numérico extraído: ${valorNumerico}`);
+
                             // Formata para moeda brasileira
                             const valorFormatado = valorNumerico.toFixed(2)
                                 .replace('.', ',')
                                 .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                            
+
                             const valorFinal = 'R\$ ' + valorFormatado;
                             elemento.value = valorFinal;
                             console.log(`💰 Valor formatado final: ${valorFinal}`);
                         }
                         break;
-                        
+
                     case 'formaPagamento':
                         // Valida se a forma de pagamento existe no novo formato
                         const [tipoPagamento, numParcelas] = valorDecodificado.split('_');
@@ -341,7 +340,7 @@ function atualizarValorCalculado() {
                             console.warn(`⚠️ Forma de pagamento inválida: ${valorDecodificado}`);
                         }
                         break;
-                        
+
                     case 'dataChegada':
                     case 'dataSaida':
                         // Converte diferentes formatos de data para YYYY-MM-DD
@@ -350,37 +349,37 @@ function atualizarValorCalculado() {
                             elemento.value = dataFormatada;
                         }
                         break;
-                        
+
                     default:
                         // Para campos de texto simples
                         elemento.value = valorDecodificado;
                         break;
                 }
-                
+
                 console.log(`✅ Campo '${campo}' preenchido com: '${valorDecodificado}'`);
-                
+
                 // Adiciona uma classe visual para indicar preenchimento automático
                 elemento.classList.add('preenchido-automaticamente');
-                
+
             } else {
                 console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
             }
         });
-        
+
         // Atualiza o cálculo após preencher os campos
         setTimeout(() => {
             // Garante que as opções do dropdown sejam geradas após o valor ser preenchido
-            gerarOpcoesDropdown(); 
+            gerarOpcoesDropdown();
             atualizarValorCalculado();
         }, 100);
     }
-    
+
     // Função auxiliar para formatar datas
     function formatarDataParaInput(dataString) {
         try {
             // Tenta diferentes formatos de data
             let data;
-            
+
             // Formato: DD/MM/YYYY ou DD-MM-YYYY
             if (dataString.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/)) {
                 const partes = dataString.split(/[\/\-]/);
@@ -395,27 +394,26 @@ function atualizarValorCalculado() {
                 const partes = dataString.split(/[\/\-]/);
                 const ano = parseInt(partes[2]) + (parseInt(partes[2]) > 50 ? 1900 : 2000);
                 data = new Date(ano, partes[1] - 1, partes[0]);
-            }
-            else {
+            } else {
                 // Tenta parsing direto
                 data = new Date(dataString);
             }
-            
+
             // Verifica se a data é válida
             if (isNaN(data.getTime())) {
                 console.warn(`⚠️ Data inválida: ${dataString}`);
                 return null;
             }
-            
+
             // Retorna no formato YYYY-MM-DD
             return data.toISOString().split('T')[0];
-            
+
         } catch (error) {
             console.warn(`⚠️ Erro ao formatar data '${dataString}':`, error);
             return null;
         }
     }
-    
+
     // Executa o preenchimento automático quando a página carrega
     preencherCamposViaURL();
 
@@ -434,7 +432,7 @@ function atualizarValorCalculado() {
     }
 
     // ===== MÁSCARAS DE FORMATAÇÃO =====
-    
+
     // Máscara para CPF
     document.getElementById('cpf').addEventListener('input', function(e) {
         let value = e.target.value.replace(/\D/g, '');
@@ -469,14 +467,14 @@ function atualizarValorCalculado() {
         if (!value) {
             e.target.value = '';
             gerarOpcoesDropdown(); // Chamar aqui para limpar as opções quando o valor é vazio
-            atualizarValorCalculado(); 
+            atualizarValorCalculado();
             return;
         }
         value = (parseInt(value) / 100).toFixed(2);
         value = value.replace('.', ',');
         value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         e.target.value = 'R\$ ' + value;
-        
+
         // Atualiza as opções do dropdown e o valor calculado em tempo real
         gerarOpcoesDropdown(); // Adicionado aqui para recalcular as opções quando o valor muda
         atualizarValorCalculado();
@@ -616,13 +614,13 @@ function atualizarValorCalculado() {
     }
 
     // ===== MANIPULADOR DO FORMULÁRIO =====
-    
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const submitButton = document.querySelector('.submit-button');
         const textoOriginal = submitButton.innerHTML;
-        
+
         // Ativa o loading
         submitButton.innerHTML = '<span class="loading-spinner"></span> Validando dados...';
         submitButton.disabled = true;
@@ -650,7 +648,7 @@ function atualizarValorCalculado() {
             dataChegada: document.getElementById('dataChegada').value,
             dataSaida: document.getElementById('dataSaida').value,
             aceitoRegulamento: document.getElementById('aceitoRegulamento').checked,
-            comunicacoesFazenda: document.querySelector('input[name="comunicacoesFazenda"]:checked') ? 
+            comunicacoesFazenda: document.querySelector('input[name="comunicacoesFazenda"]:checked') ?
                 document.querySelector('input[name="comunicacoesFazenda"]:checked').value : 'não informado'
         };
 
@@ -750,7 +748,7 @@ function atualizarValorCalculado() {
         submitButton.innerHTML = '<span class="loading-spinner"></span> Enviando dados...';
 
         // Envio para N8N
-        console.log('�� Enviando dados para n8n...', formData);
+        console.log('📦 Enviando dados para n8n...', formData);
         const resultado = await enviarParaN8N(formData);
 
         if (resultado.success) {
@@ -771,8 +769,8 @@ function atualizarValorCalculado() {
         }
     });
 
-    // Chamadas iniciais para garantir que o dropdown esteja populado 
+    // Chamadas iniciais para garantir que o dropdown esteja populado
     // e o cálculo seja feito quando a página carrega, mesmo sem interação do usuário.
-    gerarOpcoesDropdown(); 
+    gerarOpcoesDropdown();
     atualizarValorCalculado();
 });
