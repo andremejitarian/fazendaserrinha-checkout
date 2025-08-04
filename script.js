@@ -7,23 +7,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== CONFIGURAÇÃO DAS TAXAS DE PAGAMENTO =====
     
     const taxasPagamento = {
-        'cc_vista': { nome: 'Cartão - À vista', taxaFixa: 0.49, taxaPercentual: 0.0399 },
-        'cc_2_6': { nome: 'Cartão - 2 a 6 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0449 },
-        'cc_7_12': { nome: 'Cartão - 7 a 12 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 },
-        'cc_13_21': { nome: 'Cartão - 13 a 21 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0529 },
-        'pix_vista': { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0000 },
-        'pix_2_3': { nome: 'PIX - 2 a 3 parcelas', taxaFixa: 1.99, taxaPercentual: 0.0200 }
+        cartao: {
+            1: { nome: 'Cartão - À vista', taxaFixa: 0.49, taxaPercentual: 0.0399 },
+            2: { nome: 'Cartão - 2 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0449 },
+            3: { nome: 'Cartão - 3 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0449 },
+            4: { nome: 'Cartão - 4 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0449 },
+            5: { nome: 'Cartão - 5 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0449 },
+            6: { nome: 'Cartão - 6 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0449 },
+            7: { nome: 'Cartão - 7 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 },
+            8: { nome: 'Cartão - 8 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 },
+            9: { nome: 'Cartão - 9 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 },
+            10: { nome: 'Cartão - 10 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 },
+            11: { nome: 'Cartão - 11 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 },
+            12: { nome: 'Cartão - 12 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 }
+        },
+        pix: {
+            1: { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0000 },
+            2: { nome: 'PIX - 2 parcelas', taxaFixa: 1.99, taxaPercentual: 0.0200 },
+            3: { nome: 'PIX - 3 parcelas', taxaFixa: 1.99, taxaPercentual: 0.0200 }
+        }
     };
 
     // ===== FUNÇÕES DE CÁLCULO DE TAXAS =====
     
     // Função para calcular o valor com taxas
-    function calcularValorComTaxas(valorLiquido, formaPagamento) {
-        if (!formaPagamento || !taxasPagamento[formaPagamento]) {
+    function calcularValorComTaxas(valorLiquido, tipo, parcelas) {
+        if (!tipo || !parcelas || !taxasPagamento[tipo] || !taxasPagamento[tipo][parcelas]) {
             return null;
         }
         
-        const taxa = taxasPagamento[formaPagamento];
+        const taxa = taxasPagamento[tipo][parcelas];
         const valorNumerico = parseFloat(valorLiquido) || 0;
         
         if (valorNumerico <= 0) {
@@ -35,13 +48,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log(`💰 Cálculo de taxa:`, {
             valorLiquido: valorNumerico,
+            tipo: tipo,
+            parcelas: parcelas,
             formaPagamento: taxa.nome,
             taxaFixa: taxa.taxaFixa,
             taxaPercentual: (taxa.taxaPercentual * 100).toFixed(2) + '%',
-            valorBruto: valorBruto.toFixed(2)
+            valorBruto: valorBruto.toFixed(2),
+            valorPorParcela: (valorBruto / parcelas).toFixed(2)
         });
         
-        return valorBruto;
+        return {
+            total: valorBruto,
+            porParcela: valorBruto / parcelas,
+            taxa: taxa
+        };
     }
 
     // Função para formatar valor para moeda
@@ -67,6 +87,60 @@ document.addEventListener('DOMContentLoaded', () => {
         return parseFloat(valor) || 0;
     }
 
+    // Função para gerar opções do dropdown dinamicamente
+    function gerarOpcoesDropdown() {
+        const campoValor = document.getElementById('valor');
+        const valorLiquido = extrairValorNumerico(campoValor.value);
+        
+        const optgroupCartao = document.getElementById('optgroup-cartao');
+        const optgroupPix = document.getElementById('optgroup-pix');
+        
+        // Limpa opções existentes
+        optgroupCartao.innerHTML = '';
+        optgroupPix.innerHTML = '';
+        
+        if (valorLiquido <= 0) {
+            // Se não há valor, mostra opções genéricas
+            optgroupCartao.innerHTML = '<option value="" disabled>Informe um valor primeiro</option>';
+            optgroupPix.innerHTML = '<option value="" disabled>Informe um valor primeiro</option>';
+            return;
+        }
+        
+        // Gera opções para Cartão
+        for (let parcelas = 1; parcelas <= 12; parcelas++) {
+            const calculo = calcularValorComTaxas(valorLiquido, 'cartao', parcelas);
+            if (calculo) {
+                const option = document.createElement('option');
+                option.value = `cartao_${parcelas}`;
+                
+                if (parcelas === 1) {
+                    option.textContent = `À vista - ${formatarParaMoeda(calculo.total)}`;
+                } else {
+                    option.textContent = `${parcelas} parcelas - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                }
+                
+                optgroupCartao.appendChild(option);
+            }
+        }
+        
+        // Gera opções para PIX
+        for (let parcelas = 1; parcelas <= 3; parcelas++) {
+            const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
+            if (calculo) {
+                const option = document.createElement('option');
+                option.value = `pix_${parcelas}`;
+                
+                if (parcelas === 1) {
+                    option.textContent = `À vista - ${formatarParaMoeda(calculo.total)}`;
+                } else {
+                    option.textContent = `${parcelas} parcelas - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                }
+                
+                optgroupPix.appendChild(option);
+            }
+        }
+    }
+
     // Função para atualizar o valor calculado
     function atualizarValorCalculado() {
         const campoValor = document.getElementById('valor');
@@ -83,6 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log(`🔄 Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
         
+        // Regenera as opções do dropdown
+        gerarOpcoesDropdown();
+        
         if (!formaPagamento) {
             campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
@@ -95,21 +172,42 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        const valorComTaxas = calcularValorComTaxas(valorLiquido, formaPagamento);
+        // Parse da forma de pagamento selecionada
+        const [tipo, parcelas] = formaPagamento.split('_');
+        const calculo = calcularValorComTaxas(valorLiquido, tipo, parseInt(parcelas));
         
-        if (valorComTaxas) {
-            campoValorCalculado.value = formatarParaMoeda(valorComTaxas);
+        if (calculo) {
+            campoValorCalculado.value = formatarParaMoeda(calculo.total);
             campoValorCalculado.placeholder = '';
             
             // Mostra diferença se houver taxa
-            if (valorComTaxas > valorLiquido) {
-                const diferenca = valorComTaxas - valorLiquido;
+            if (calculo.total > valorLiquido) {
+                const diferenca = calculo.total - valorLiquido;
                 console.log(`💡 Taxa aplicada: ${formatarParaMoeda(diferenca)}`);
             }
         } else {
             campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Erro no cálculo';
         }
+    }
+
+    // Função para obter dados da forma de pagamento selecionada
+    function obterDadosFormaPagamento(formaPagamento) {
+        if (!formaPagamento) return null;
+        
+        const [tipo, parcelas] = formaPagamento.split('_');
+        const parcelasNum = parseInt(parcelas);
+        
+        if (taxasPagamento[tipo] && taxasPagamento[tipo][parcelasNum]) {
+            return {
+                tipo: tipo,
+                parcelas: parcelasNum,
+                nome: taxasPagamento[tipo][parcelasNum].nome,
+                taxa: taxasPagamento[tipo][parcelasNum]
+            };
+        }
+        
+        return null;
     }
 
     // ===== PREENCHIMENTO VIA URL =====
@@ -127,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'celular': 'celular',
             'evento': 'nomeEvento',
             'valor': 'valor',
-            'pagamento': 'formaPagamento', // NOVO
+            'pagamento': 'formaPagamento',
             'chegada': 'dataChegada',
             'saida': 'dataSaida'
         };
@@ -205,10 +303,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         break;
                         
                     case 'formaPagamento':
-                        // Valida se a forma de pagamento existe
-                        if (taxasPagamento[valorDecodificado]) {
+                        // Valida se a forma de pagamento existe no novo formato
+                        const [tipoPagamento, numParcelas] = valorDecodificado.split('_');
+                        if (taxasPagamento[tipoPagamento] && taxasPagamento[tipoPagamento][parseInt(numParcelas)]) {
                             elemento.value = valorDecodificado;
-                            console.log(`💳 Forma de pagamento selecionada: ${taxasPagamento[valorDecodificado].nome}`);
+                            console.log(`💳 Forma de pagamento selecionada: ${valorDecodificado}`);
                         } else {
                             console.warn(`⚠️ Forma de pagamento inválida: ${valorDecodificado}`);
                         }
@@ -502,6 +601,8 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.style.opacity = '0.7';
 
         // Coleta os dados do formulário
+        const dadosFormaPagamento = obterDadosFormaPagamento(document.getElementById('formaPagamento').value);
+
         const formData = {
             nomeCompleto: document.getElementById('nomeCompleto').value.trim(),
             cpf: document.getElementById('cpf').value,
@@ -513,7 +614,9 @@ document.addEventListener('DOMContentLoaded', () => {
             valor: document.getElementById('valor').value,
             valorNumerico: converterValorParaNumero(document.getElementById('valor').value),
             formaPagamento: document.getElementById('formaPagamento').value,
-            formaPagamentoNome: taxasPagamento[document.getElementById('formaPagamento').value]?.nome || '',
+            formaPagamentoTipo: dadosFormaPagamento?.tipo || '',
+            formaPagamentoParcelas: dadosFormaPagamento?.parcelas || 0,
+            formaPagamentoNome: dadosFormaPagamento?.nome || '',
             valorCalculado: document.getElementById('valorCalculado').value,
             valorCalculadoNumerico: extrairValorNumerico(document.getElementById('valorCalculado').value),
             dataChegada: document.getElementById('dataChegada').value,
@@ -576,14 +679,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // NOVA: Validação da forma de pagamento
+        // Validação da forma de pagamento
         if (!formData.formaPagamento) {
             restaurarBotao();
             mostrarMensagem('Por favor, selecione uma forma de pagamento.', 'erro');
             return;
         }
 
-        // NOVA: Validação do valor calculado
+        // Validação do valor calculado
         if (formData.valorCalculadoNumerico <= 0) {
             restaurarBotao();
             mostrarMensagem('Erro no cálculo do valor. Verifique os dados informados.', 'erro');
@@ -629,6 +732,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 form.reset();
                 document.getElementById('valorCalculado').value = '';
                 document.getElementById('valorCalculado').placeholder = 'Selecione uma forma de pagamento';
+                // Limpa as opções do dropdown
+                document.getElementById('optgroup-cartao').innerHTML = '';
+                document.getElementById('optgroup-pix').innerHTML = '';
                 showWelcomeScreen();
             }, 3000);
         } else {
