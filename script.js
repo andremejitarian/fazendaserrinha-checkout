@@ -129,11 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (calculo) {
                 const option = document.createElement('option');
                 option.value = `cartao_${parcelas}`;
+
+                const tipoPagamento = getPaymentTypeName('cartao'); // "cartão"
                 
                 if (parcelas === 1) {
-                    option.textContent = `À vista - ${formatarParaMoeda(calculo.total)}`;
+                    option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
                 } else {
-                    option.textContent = `${parcelas} parcelas - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                    option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
                 }
                 
                 optgroupCartao.appendChild(option);
@@ -146,11 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (calculo) {
                 const option = document.createElement('option');
                 option.value = `pix_${parcelas}`;
+
+                const tipoPagamento = getPaymentTypeName('pix'); // "pix"
                 
                 if (parcelas === 1) {
-                    option.textContent = `À vista - ${formatarParaMoeda(calculo.total)}`;
+                    option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
                 } else {
-                    option.textContent = `${parcelas} parcelas - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                    option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
                 }
                 
                 optgroupPix.appendChild(option);
