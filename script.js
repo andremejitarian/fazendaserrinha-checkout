@@ -34,132 +34,229 @@ document.addEventListener('DOMContentLoaded', () => {
         return parametros;
     }
     
-    // Função para preencher os campos do formulário
-    function preencherCamposViaURL() {
-        const parametros = obterParametrosURL();
+    // Função para preencher os campos do formulário e bloquear edição
+function preencherCamposViaURL() {
+    const parametros = obterParametrosURL();
+    
+    // Se não há parâmetros, não faz nada
+    if (Object.keys(parametros).length === 0) {
+        console.log('ℹ️ Nenhum parâmetro encontrado na URL');
+        return;
+    }
+    
+    console.log('🔄 Preenchendo campos automaticamente...');
+    
+    // Preenche cada campo encontrado
+    Object.entries(parametros).forEach(([campo, valor]) => {
+        const elemento = document.getElementById(campo);
         
-        // Se não há parâmetros, não faz nada
-        if (Object.keys(parametros).length === 0) {
-            console.log('ℹ️ Nenhum parâmetro encontrado na URL');
-            return;
-        }
-        
-        console.log('🔄 Preenchendo campos automaticamente...');
-        
-        // Preenche cada campo encontrado
-        Object.entries(parametros).forEach(([campo, valor]) => {
-            const elemento = document.getElementById(campo);
+        if (elemento) {
+            // Decodifica o valor (para caracteres especiais)
+            const valorDecodificado = decodeURIComponent(valor);
             
-            if (elemento) {
-                // Decodifica o valor (para caracteres especiais)
-                const valorDecodificado = decodeURIComponent(valor);
-                
-                // Tratamento especial para diferentes tipos de campo
-                switch (campo) {
-                    case 'cpf':
-                        // Remove formatação e aplica máscara
-                        const cpfLimpo = valorDecodificado.replace(/\D/g, '');
-                        elemento.value = cpfLimpo;
+            // Tratamento especial para diferentes tipos de campo
+            switch (campo) {
+                case 'cpf':
+                    // Remove formatação e aplica máscara
+                    const cpfLimpo = valorDecodificado.replace(/\D/g, '');
+                    elemento.value = cpfLimpo;
+                    // Dispara evento para aplicar máscara
+                    elemento.dispatchEvent(new Event('input'));
+                    break;
+                    
+                case 'celular':
+                    // Remove formatação e aplica máscara
+                    const celularLimpo = valorDecodificado.replace(/\D/g, '');
+                    elemento.value = celularLimpo;
+                    // Dispara evento para aplicar máscara
+                    elemento.dispatchEvent(new Event('input'));
+                    break;
+                    
+                case 'valor':
+                    // Se o valor não tem R\$, adiciona formatação
+                    if (!valorDecodificado.includes('R\$')) {
+                        // Assume que o valor está em formato numérico (ex: 150.00 ou 150)
+                        const valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
+                        const valorCentavos = Math.round(valorNumerico * 100);
+                        elemento.value = valorCentavos.toString();
                         // Dispara evento para aplicar máscara
                         elemento.dispatchEvent(new Event('input'));
-                        break;
-                        
-                    case 'celular':
-                        // Remove formatação e aplica máscara
-                        const celularLimpo = valorDecodificado.replace(/\D/g, '');
-                        elemento.value = celularLimpo;
-                        // Dispara evento para aplicar máscara
-                        elemento.dispatchEvent(new Event('input'));
-                        break;
-                        
-                    case 'valor':
-                        // Se o valor não tem R\$, adiciona formatação
-                        if (!valorDecodificado.includes('R\$')) {
-                            // Assume que o valor está em formato numérico (ex: 150.00 ou 150)
-                            const valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
-                            const valorCentavos = Math.round(valorNumerico * 100);
-                            elemento.value = valorCentavos.toString();
-                            // Dispara evento para aplicar máscara
-                            elemento.dispatchEvent(new Event('input'));
-                        } else {
-                            elemento.value = valorDecodificado;
-                        }
-                        break;
-                        
-                    case 'dataChegada':
-                    case 'dataSaida':
-                        // Converte diferentes formatos de data para YYYY-MM-DD
-                        const dataFormatada = formatarDataParaInput(valorDecodificado);
-                        if (dataFormatada) {
-                            elemento.value = dataFormatada;
-                        }
-                        break;
-                        
-                    default:
-                        // Para campos de texto simples
+                    } else {
                         elemento.value = valorDecodificado;
-                        break;
-                }
-                
-                console.log(`✅ Campo '${campo}' preenchido com: '${valorDecodificado}'`);
-                
-                // Adiciona uma classe visual para indicar preenchimento automático
-                elemento.classList.add('preenchido-automaticamente');
-                
-            } else {
-                console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
-            }
-        });
-        
-        // Mostra mensagem de sucesso
-        setTimeout(() => {
-            mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
-        }, 500);
-    }
-    
-    // Função auxiliar para formatar datas
-    function formatarDataParaInput(dataString) {
-        try {
-            // Tenta diferentes formatos de data
-            let data;
-            
-            // Formato: DD/MM/YYYY ou DD-MM-YYYY
-            if (dataString.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/)) {
-                const partes = dataString.split(/[\/\-]/);
-                data = new Date(partes[2], partes[1] - 1, partes[0]);
-            }
-            // Formato: YYYY-MM-DD (já correto)
-            else if (dataString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                return dataString;
-            }
-            // Formato: DD/MM/YY
-            else if (dataString.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{2}$/)) {
-                const partes = dataString.split(/[\/\-]/);
-                const ano = parseInt(partes[2]) + (parseInt(partes[2]) > 50 ? 1900 : 2000);
-                data = new Date(ano, partes[1] - 1, partes[0]);
-            }
-            else {
-                // Tenta parsing direto
-                data = new Date(dataString);
+                    }
+                    break;
+                    
+                case 'dataChegada':
+                case 'dataSaida':
+                    // Converte diferentes formatos de data para YYYY-MM-DD
+                    const dataFormatada = formatarDataParaInput(valorDecodificado);
+                    if (dataFormatada) {
+                        elemento.value = dataFormatada;
+                    }
+                    break;
+                    
+                default:
+                    // Para campos de texto simples
+                    elemento.value = valorDecodificado;
+                    break;
             }
             
-            // Verifica se a data é válida
-            if (isNaN(data.getTime())) {
-                console.warn(`⚠️ Data inválida: ${dataString}`);
-                return null;
-            }
+            // ===== NOVA: BLOQUEIA A EDIÇÃO DO CAMPO =====
+            bloquearEdicaoCampo(elemento, valorDecodificado);
             
-            // Retorna no formato YYYY-MM-DD
-            return data.toISOString().split('T')[0];
+            console.log(`✅ Campo '${campo}' preenchido e bloqueado com: '${valorDecodificado}'`);
             
-        } catch (error) {
-            console.warn(`⚠️ Erro ao formatar data '${dataString}':`, error);
-            return null;
+        } else {
+            console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
         }
-    }
+    });
     
-    // Executa o preenchimento automático quando a página carrega
-    preencherCamposViaURL();
+    // Mostra mensagem de sucesso
+    setTimeout(() => {
+        mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL (não editáveis)`, 'sucesso');
+    }, 500);
+}
+
+// ===== NOVA: FUNÇÃO PARA BLOQUEAR EDIÇÃO =====
+function bloquearEdicaoCampo(elemento, valorOriginal) {
+    // Adiciona classes para estilo visual
+    elemento.classList.add('preenchido-automaticamente');
+    elemento.classList.add('campo-bloqueado');
+    
+    // Torna o campo readonly
+    elemento.readOnly = true;
+    
+    // Adiciona atributo para identificar que foi preenchido via URL
+    elemento.setAttribute('data-preenchido-url', 'true');
+    elemento.setAttribute('data-valor-original', valorOriginal);
+    
+    // Adiciona um ícone de cadeado
+    adicionarIconeCadeado(elemento);
+    
+    // Adiciona tooltip explicativo
+    elemento.title = 'Este campo foi preenchido automaticamente via URL e não pode ser editado';
+    
+    // Bloqueia tentativas de edição via JavaScript
+    elemento.addEventListener('keydown', bloquearTeclas);
+    elemento.addEventListener('paste', bloquearColar);
+    elemento.addEventListener('cut', bloquearCortar);
+    elemento.addEventListener('contextmenu', bloquearMenuContexto);
+    
+    // Adiciona evento de clique para mostrar aviso
+    elemento.addEventListener('click', mostrarAvisoCampoBloqueado);
+}
+
+// Função para adicionar ícone de cadeado
+function adicionarIconeCadeado(elemento) {
+    // Verifica se já existe um ícone
+    const containerExistente = elemento.parentNode.querySelector('.campo-bloqueado-container');
+    if (containerExistente) return;
+    
+    // Cria container para o ícone
+    const container = document.createElement('div');
+    container.className = 'campo-bloqueado-container';
+    container.style.position = 'relative';
+    container.style.display = 'inline-block';
+    container.style.width = '100%';
+    
+    // Cria o ícone de cadeado
+    const icone = document.createElement('span');
+    icone.className = 'campo-bloqueado-icone';
+    icone.innerHTML = '🔒';
+    icone.style.position = 'absolute';
+    icone.style.right = '10px';
+    icone.style.top = '50%';
+    icone.style.transform = 'translateY(-50%)';
+    icone.style.fontSize = '14px';
+    icone.style.zIndex = '10';
+    icone.style.pointerEvents = 'none';
+    icone.title = 'Campo bloqueado - preenchido via URL';
+    
+    // Reorganiza o DOM
+    const parent = elemento.parentNode;
+    parent.insertBefore(container, elemento);
+    container.appendChild(elemento);
+    container.appendChild(icone);
+}
+
+// Funções para bloquear interações
+function bloquearTeclas(event) {
+    // Permite apenas teclas de navegação
+    const teclasPermitidas = [
+        'Tab', 'Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+        'Home', 'End', 'PageUp', 'PageDown'
+    ];
+    
+    if (!teclasPermitidas.includes(event.key) && !event.ctrlKey) {
+        event.preventDefault();
+        mostrarAvisoCampoBloqueado();
+    }
+}
+
+function bloquearColar(event) {
+    event.preventDefault();
+    mostrarAvisoCampoBloqueado();
+}
+
+function bloquearCortar(event) {
+    event.preventDefault();
+    mostrarAvisoCampoBloqueado();
+}
+
+function bloquearMenuContexto(event) {
+    event.preventDefault();
+    mostrarAvisoCampoBloqueado();
+}
+
+// Função para mostrar aviso quando tentar editar
+function mostrarAvisoCampoBloqueado() {
+    // Evita spam de mensagens
+    if (window.avisoMostrado) return;
+    window.avisoMostrado = true;
+    
+    mostrarMensagem('🔒 Este campo foi preenchido automaticamente via URL e não pode ser editado', 'erro');
+    
+    // Permite mostrar o aviso novamente após 3 segundos
+    setTimeout(() => {
+        window.avisoMostrado = false;
+    }, 3000);
+}
+
+// ===== NOVA: FUNÇÃO PARA DESBLOQUEAR CAMPOS (OPCIONAL) =====
+function desbloquearTodosCampos() {
+    const camposBloqueados = document.querySelectorAll('[data-preenchido-url="true"]');
+    
+    camposBloqueados.forEach(campo => {
+        // Remove readonly
+        campo.readOnly = false;
+        
+        // Remove classes
+        campo.classList.remove('preenchido-automaticamente', 'campo-bloqueado');
+        
+        // Remove atributos
+        campo.removeAttribute('data-preenchido-url');
+        campo.removeAttribute('data-valor-original');
+        campo.title = '';
+        
+        // Remove event listeners
+        campo.removeEventListener('keydown', bloquearTeclas);
+        campo.removeEventListener('paste', bloquearColar);
+        campo.removeEventListener('cut', bloquearCortar);
+        campo.removeEventListener('contextmenu', bloquearMenuContexto);
+        campo.removeEventListener('click', mostrarAvisoCampoBloqueado);
+        
+        // Remove ícone de cadeado
+        const container = campo.parentNode;
+        if (container.classList.contains('campo-bloqueado-container')) {
+            const parent = container.parentNode;
+            parent.insertBefore(campo, container);
+            container.remove();
+        }
+    });
+    
+    console.log('🔓 Todos os campos foram desbloqueados');
+    mostrarMensagem('🔓 Campos desbloqueados para edição', 'sucesso');
+}
 
 
     // Função para mostrar a tela do formulário
