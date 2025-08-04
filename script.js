@@ -4,7 +4,115 @@ document.addEventListener('DOMContentLoaded', () => {
     // URL da webhook do n8n (apenas para envio final)
     const WEBHOOK_URL = 'https://criadordigital-n8n-editor.kttqgl.easypanel.host/webhook-test/91479e0c-d686-42dd-a381-c3e44d50df7e';
 
-// ===== NOVA: PREENCHIMENTO VIA URL =====
+    // ===== CONFIGURAÇÃO DAS TAXAS DE PAGAMENTO =====
+    
+    const taxasPagamento = {
+        'cc_vista': { nome: 'Cartão - À vista', taxaFixa: 0.49, taxaPercentual: 0.0399 },
+        'cc_2_6': { nome: 'Cartão - 2 a 6 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0449 },
+        'cc_7_12': { nome: 'Cartão - 7 a 12 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 },
+        'cc_13_21': { nome: 'Cartão - 13 a 21 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0529 },
+        'pix_vista': { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0000 },
+        'pix_2_3': { nome: 'PIX - 2 a 3 parcelas', taxaFixa: 1.99, taxaPercentual: 0.0200 }
+    };
+
+    // ===== FUNÇÕES DE CÁLCULO DE TAXAS =====
+    
+    // Função para calcular o valor com taxas
+    function calcularValorComTaxas(valorLiquido, formaPagamento) {
+        if (!formaPagamento || !taxasPagamento[formaPagamento]) {
+            return null;
+        }
+        
+        const taxa = taxasPagamento[formaPagamento];
+        const valorNumerico = parseFloat(valorLiquido) || 0;
+        
+        if (valorNumerico <= 0) {
+            return null;
+        }
+        
+        // Fórmula: V_bruto = (V_liquido + T_fixa) / (1 - P_percentual)
+        const valorBruto = (valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual);
+        
+        console.log(`💰 Cálculo de taxa:`, {
+            valorLiquido: valorNumerico,
+            formaPagamento: taxa.nome,
+            taxaFixa: taxa.taxaFixa,
+            taxaPercentual: (taxa.taxaPercentual * 100).toFixed(2) + '%',
+            valorBruto: valorBruto.toFixed(2)
+        });
+        
+        return valorBruto;
+    }
+
+    // Função para formatar valor para moeda
+    function formatarParaMoeda(valor) {
+        if (!valor || isNaN(valor)) return '';
+        
+        return valor.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+    }
+
+    // Função para extrair valor numérico do campo formatado
+    function extrairValorNumerico(valorFormatado) {
+        if (!valorFormatado) return 0;
+        
+        // Remove R\$, espaços, pontos (milhares) e converte vírgula para ponto
+        let valor = valorFormatado
+            .replace(/R\$\s?/g, '')
+            .replace(/\./g, '')
+            .replace(',', '.');
+        
+        return parseFloat(valor) || 0;
+    }
+
+    // Função para atualizar o valor calculado
+    function atualizarValorCalculado() {
+        const campoValor = document.getElementById('valor');
+        const campoFormaPagamento = document.getElementById('formaPagamento');
+        const campoValorCalculado = document.getElementById('valorCalculado');
+        
+        if (!campoValor || !campoFormaPagamento || !campoValorCalculado) {
+            console.warn('⚠️ Campos necessários não encontrados');
+            return;
+        }
+        
+        const valorLiquido = extrairValorNumerico(campoValor.value);
+        const formaPagamento = campoFormaPagamento.value;
+        
+        console.log(`🔄 Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
+        
+        if (!formaPagamento) {
+            campoValorCalculado.value = '';
+            campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
+            return;
+        }
+        
+        if (valorLiquido <= 0) {
+            campoValorCalculado.value = '';
+            campoValorCalculado.placeholder = 'Informe um valor válido';
+            return;
+        }
+        
+        const valorComTaxas = calcularValorComTaxas(valorLiquido, formaPagamento);
+        
+        if (valorComTaxas) {
+            campoValorCalculado.value = formatarParaMoeda(valorComTaxas);
+            campoValorCalculado.placeholder = '';
+            
+            // Mostra diferença se houver taxa
+            if (valorComTaxas > valorLiquido) {
+                const diferenca = valorComTaxas - valorLiquido;
+                console.log(`💡 Taxa aplicada: ${formatarParaMoeda(diferenca)}`);
+            }
+        } else {
+            campoValorCalculado.value = '';
+            campoValorCalculado.placeholder = 'Erro no cálculo';
+        }
+    }
+
+    // ===== PREENCHIMENTO VIA URL =====
     
     // Função para extrair parâmetros da URL
     function obterParametrosURL() {
@@ -19,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'celular': 'celular',
             'evento': 'nomeEvento',
             'valor': 'valor',
+            'pagamento': 'formaPagamento', // NOVO
             'chegada': 'dataChegada',
             'saida': 'dataSaida'
         };
@@ -34,97 +143,112 @@ document.addEventListener('DOMContentLoaded', () => {
         return parametros;
     }
     
-// Função para preencher os campos do formulário
-function preencherCamposViaURL() {
-    const parametros = obterParametrosURL();
-    
-    // Se não há parâmetros, não faz nada
-    if (Object.keys(parametros).length === 0) {
-        console.log('ℹ️ Nenhum parâmetro encontrado na URL');
-        return;
-    }
-    
-    console.log('🔄 Preenchendo campos automaticamente...');
-    
-    // Preenche cada campo encontrado
-    Object.entries(parametros).forEach(([campo, valor]) => {
-        const elemento = document.getElementById(campo);
+    // Função para preencher os campos do formulário
+    function preencherCamposViaURL() {
+        const parametros = obterParametrosURL();
         
-        if (elemento) {
-            // Decodifica o valor (para caracteres especiais)
-            const valorDecodificado = decodeURIComponent(valor);
-            
-            // Tratamento especial para diferentes tipos de campo
-            switch (campo) {
-                case 'cpf':
-                    // Remove formatação e aplica máscara
-                    const cpfLimpo = valorDecodificado.replace(/\D/g, '');
-                    elemento.value = cpfLimpo;
-                    // Dispara evento para aplicar máscara
-                    elemento.dispatchEvent(new Event('input'));
-                    break;
-                    
-                case 'celular':
-                    // Remove formatação e aplica máscara
-                    const celularLimpo = valorDecodificado.replace(/\D/g, '');
-                    elemento.value = celularLimpo;
-                    // Dispara evento para aplicar máscara
-                    elemento.dispatchEvent(new Event('input'));
-                    break;
-                    
-                case 'valor':
-                    console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
-                    
-                    // Se o valor já tem R\$, usa diretamente
-                    if (valorDecodificado.includes('R\$')) {
-                        elemento.value = valorDecodificado;
-                        console.log(`✅ Valor com R\$ aplicado diretamente: ${valorDecodificado}`);
-                    } else {
-                        // Converte valor numérico para formato monetário brasileiro
-                        let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
-                        console.log(`🔢 Valor numérico extraído: ${valorNumerico}`);
-                        
-                        // Formata para moeda brasileira
-                        const valorFormatado = valorNumerico.toFixed(2)
-                            .replace('.', ',')
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                        
-                        const valorFinal = 'R\$ ' + valorFormatado;
-                        elemento.value = valorFinal;
-                        console.log(`💰 Valor formatado final: ${valorFinal}`);
-                    }
-                    break;
-                    
-                case 'dataChegada':
-                case 'dataSaida':
-                    // Converte diferentes formatos de data para YYYY-MM-DD
-                    const dataFormatada = formatarDataParaInput(valorDecodificado);
-                    if (dataFormatada) {
-                        elemento.value = dataFormatada;
-                    }
-                    break;
-                    
-                default:
-                    // Para campos de texto simples
-                    elemento.value = valorDecodificado;
-                    break;
-            }
-            
-            console.log(`✅ Campo '${campo}' preenchido com: '${valorDecodificado}'`);
-            
-            // Adiciona uma classe visual para indicar preenchimento automático
-            elemento.classList.add('preenchido-automaticamente');
-            
-        } else {
-            console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
+        // Se não há parâmetros, não faz nada
+        if (Object.keys(parametros).length === 0) {
+            console.log('ℹ️ Nenhum parâmetro encontrado na URL');
+            return;
         }
-    });
-    
-    // Mostra mensagem de sucesso
-    setTimeout(() => {
-        mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
-    }, 500);
-}
+        
+        console.log('🔄 Preenchendo campos automaticamente...');
+        
+        // Preenche cada campo encontrado
+        Object.entries(parametros).forEach(([campo, valor]) => {
+            const elemento = document.getElementById(campo);
+            
+            if (elemento) {
+                // Decodifica o valor (para caracteres especiais)
+                const valorDecodificado = decodeURIComponent(valor);
+                
+                // Tratamento especial para diferentes tipos de campo
+                switch (campo) {
+                    case 'cpf':
+                        // Remove formatação e aplica máscara
+                        const cpfLimpo = valorDecodificado.replace(/\D/g, '');
+                        elemento.value = cpfLimpo;
+                        // Dispara evento para aplicar máscara
+                        elemento.dispatchEvent(new Event('input'));
+                        break;
+                        
+                    case 'celular':
+                        // Remove formatação e aplica máscara
+                        const celularLimpo = valorDecodificado.replace(/\D/g, '');
+                        elemento.value = celularLimpo;
+                        // Dispara evento para aplicar máscara
+                        elemento.dispatchEvent(new Event('input'));
+                        break;
+                        
+                    case 'valor':
+                        console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
+                        
+                        // Se o valor já tem R\$, usa diretamente
+                        if (valorDecodificado.includes('R\$')) {
+                            elemento.value = valorDecodificado;
+                            console.log(`✅ Valor com R\$ aplicado diretamente: ${valorDecodificado}`);
+                        } else {
+                            // Converte valor numérico para formato monetário brasileiro
+                            let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
+                            console.log(`🔢 Valor numérico extraído: ${valorNumerico}`);
+                            
+                            // Formata para moeda brasileira
+                            const valorFormatado = valorNumerico.toFixed(2)
+                                .replace('.', ',')
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                            
+                            const valorFinal = 'R\$ ' + valorFormatado;
+                            elemento.value = valorFinal;
+                            console.log(`💰 Valor formatado final: ${valorFinal}`);
+                        }
+                        break;
+                        
+                    case 'formaPagamento':
+                        // Valida se a forma de pagamento existe
+                        if (taxasPagamento[valorDecodificado]) {
+                            elemento.value = valorDecodificado;
+                            console.log(`💳 Forma de pagamento selecionada: ${taxasPagamento[valorDecodificado].nome}`);
+                        } else {
+                            console.warn(`⚠️ Forma de pagamento inválida: ${valorDecodificado}`);
+                        }
+                        break;
+                        
+                    case 'dataChegada':
+                    case 'dataSaida':
+                        // Converte diferentes formatos de data para YYYY-MM-DD
+                        const dataFormatada = formatarDataParaInput(valorDecodificado);
+                        if (dataFormatada) {
+                            elemento.value = dataFormatada;
+                        }
+                        break;
+                        
+                    default:
+                        // Para campos de texto simples
+                        elemento.value = valorDecodificado;
+                        break;
+                }
+                
+                console.log(`✅ Campo '${campo}' preenchido com: '${valorDecodificado}'`);
+                
+                // Adiciona uma classe visual para indicar preenchimento automático
+                elemento.classList.add('preenchido-automaticamente');
+                
+            } else {
+                console.warn(`⚠️ Campo '${campo}' não encontrado no formulário`);
+            }
+        });
+        
+        // Atualiza o cálculo após preencher os campos
+        setTimeout(() => {
+            atualizarValorCalculado();
+        }, 100);
+        
+        // Mostra mensagem de sucesso
+        setTimeout(() => {
+            mostrarMensagem(`📋 ${Object.keys(parametros).length} campo(s) preenchido(s) automaticamente via URL`, 'sucesso');
+        }, 500);
+    }
     
     // Função auxiliar para formatar datas
     function formatarDataParaInput(dataString) {
@@ -170,6 +294,7 @@ function preencherCamposViaURL() {
     // Executa o preenchimento automático quando a página carrega
     preencherCamposViaURL();
 
+    // ===== NAVEGAÇÃO ENTRE TELAS =====
 
     // Função para mostrar a tela do formulário
     window.showFormScreen = function() {
@@ -218,12 +343,16 @@ function preencherCamposViaURL() {
         let value = e.target.value.replace(/\D/g, '');
         if (!value) {
             e.target.value = '';
+            atualizarValorCalculado(); // Atualiza cálculo quando valor é limpo
             return;
         }
         value = (parseInt(value) / 100).toFixed(2);
         value = value.replace('.', ',');
         value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         e.target.value = 'R\$ ' + value;
+        
+        // Atualiza o valor calculado em tempo real
+        atualizarValorCalculado();
     });
 
     document.getElementById('valor').addEventListener('blur', function(e) {
@@ -237,9 +366,17 @@ function preencherCamposViaURL() {
                 e.target.value = 'R\$ ' + numericValue;
             }
         }
+        // Atualiza o valor calculado após perder o foco
+        atualizarValorCalculado();
     });
 
-    // ===== VALIDAÇÃO DE CPF LOCAL (SUA FUNÇÃO ADAPTADA) =====
+    // Event listener para forma de pagamento
+    document.getElementById('formaPagamento').addEventListener('change', function(e) {
+        console.log(`💳 Forma de pagamento alterada para: ${e.target.value}`);
+        atualizarValorCalculado();
+    });
+
+    // ===== VALIDAÇÃO DE CPF LOCAL =====
     function validarCPF(cpf) {
         // Remove possíveis caracteres de formatação
         cpf = cpf.replace(/\D/g, '');
@@ -375,6 +512,10 @@ function preencherCamposViaURL() {
             nomeEvento: document.getElementById('nomeEvento').value.trim(),
             valor: document.getElementById('valor').value,
             valorNumerico: converterValorParaNumero(document.getElementById('valor').value),
+            formaPagamento: document.getElementById('formaPagamento').value,
+            formaPagamentoNome: taxasPagamento[document.getElementById('formaPagamento').value]?.nome || '',
+            valorCalculado: document.getElementById('valorCalculado').value,
+            valorCalculadoNumerico: extrairValorNumerico(document.getElementById('valorCalculado').value),
             dataChegada: document.getElementById('dataChegada').value,
             dataSaida: document.getElementById('dataSaida').value,
             aceitoRegulamento: document.getElementById('aceitoRegulamento').checked,
@@ -397,7 +538,7 @@ function preencherCamposViaURL() {
             return;
         }
 
-        // Validação do CPF (usando sua função)
+        // Validação do CPF
         console.log('🔍 Validando CPF localmente:', formData.cpfLimpo);
         if (!validarCPF(formData.cpf)) {
             restaurarBotao();
@@ -432,6 +573,20 @@ function preencherCamposViaURL() {
         if (formData.valorNumerico <= 0) {
             restaurarBotao();
             mostrarMensagem('Por favor, insira um valor válido maior que zero.', 'erro');
+            return;
+        }
+
+        // NOVA: Validação da forma de pagamento
+        if (!formData.formaPagamento) {
+            restaurarBotao();
+            mostrarMensagem('Por favor, selecione uma forma de pagamento.', 'erro');
+            return;
+        }
+
+        // NOVA: Validação do valor calculado
+        if (formData.valorCalculadoNumerico <= 0) {
+            restaurarBotao();
+            mostrarMensagem('Erro no cálculo do valor. Verifique os dados informados.', 'erro');
             return;
         }
 
@@ -472,6 +627,8 @@ function preencherCamposViaURL() {
             mostrarMensagem('✅ Check-in realizado com sucesso! Dados enviados para processamento.');
             setTimeout(() => {
                 form.reset();
+                document.getElementById('valorCalculado').value = '';
+                document.getElementById('valorCalculado').placeholder = 'Selecione uma forma de pagamento';
                 showWelcomeScreen();
             }, 3000);
         } else {
