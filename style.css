@@ -182,7 +182,8 @@ label {
 input[type="text"],
 input[type="email"],
 input[type="tel"],
-input[type="date"] {
+input[type="date"],
+select {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid #ddd;
@@ -191,12 +192,14 @@ input[type="date"] {
     color: #333;
     outline: none;
     transition: border-color 0.3s ease;
+    background-color: #fff;
 }
 
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="tel"]:focus,
-input[type="date"]:focus {
+input[type="date"]:focus,
+select:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
@@ -204,6 +207,81 @@ input[type="date"]:focus {
 /* Placeholders */
 input::placeholder {
     color: #aaa;
+}
+
+/* ===== NOVOS ESTILOS PARA FORMA DE PAGAMENTO ===== */
+
+/* Select (Dropdown) */
+select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Optgroups */
+optgroup {
+    font-weight: bold;
+    color: #495057;
+    background-color: #f8f9fa;
+    font-size: 0.95rem;
+    padding: 8px 0;
+}
+
+optgroup option {
+    font-weight: normal;
+    padding-left: 15px;
+    color: #333;
+    background-color: #fff;
+}
+
+/* Campo Valor Calculado */
+#valorCalculado {
+    background-color: #f8f9fa !important;
+    border: 2px solid #28a745 !important;
+    color: #155724 !important;
+    font-weight: bold !important;
+    font-size: 1.1em !important;
+    text-align: center !important;
+}
+
+#valorCalculado:focus {
+    background-color: #f8f9fa !important;
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+/* Campos readonly */
+input[readonly] {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* Informação dos campos */
+.campo-info {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85em;
+    color: #6c757d;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* ===== ESTILOS PARA PREENCHIMENTO VIA URL ===== */
+
+/* Destaque para campos preenchidos automaticamente */
+.preenchido-automaticamente {
+    background-color: #e8f5e8 !important;
+    border-left: 4px solid #4CAF50 !important;
+    transition: all 0.3s ease;
+}
+
+.preenchido-automaticamente:focus {
+    background-color: #ffffff !important;
+    border-left: 4px solid #2196F3 !important;
 }
 
 /* Texto Legal (LGPD, Regulamento) */
@@ -334,10 +412,19 @@ input::placeholder {
     input[type="text"],
     input[type="email"],
     input[type="tel"],
-    input[type="date"] {
+    input[type="date"],
+    select {
         padding: 10px 12px;
         font-size: 0.95rem;
     }
+    
+    /* Ajuste do select em mobile */
+    select {
+        background-size: 14px;
+        background-position: right 10px center;
+        padding-right: 35px;
+    }
+    
     .legal-text {
         font-size: 0.85rem;
         margin-top: 20px;
@@ -350,6 +437,15 @@ input::placeholder {
     .submit-button {
         padding: 12px 20px;
         font-size: 1rem;
+    }
+    
+    /* Ajustes para campos de pagamento em mobile */
+    .campo-info {
+        font-size: 0.8em;
+    }
+    
+    #valorCalculado {
+        font-size: 1.05em !important;
     }
 }
 
@@ -394,7 +490,21 @@ input::placeholder {
         margin-bottom: 20px;
         font-size: 0.9rem;
     }
+    
+    /* Ajustes específicos para telas muito pequenas */
+    optgroup {
+        font-size: 0.9rem;
+    }
+    
+    .campo-info {
+        font-size: 0.75em;
+    }
+    
+    #valorCalculado {
+        font-size: 1em !important;
+    }
 }
+
 /* ===== ESTILOS PARA AS MELHORIAS ===== */
 
 /* Loading Spinner */
