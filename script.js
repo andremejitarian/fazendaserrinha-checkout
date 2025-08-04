@@ -265,8 +265,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        console.log('�� Parâmetros encontrados na URL:', parametros);
+        console.log('🔍 Parâmetros encontrados na URL:', parametros);
         return parametros;
+    }
+
+    // ===== FUNÇÃO PARA BLOQUEAR CAMPOS =====
+    function bloquearCampo(elemento, motivo = 'Campo preenchido automaticamente') {
+        if (elemento) {
+            elemento.readOnly = true;
+            elemento.disabled = true;
+            elemento.style.backgroundColor = '#f5f5f5';
+            elemento.style.color = '#666';
+            elemento.style.cursor = 'not-allowed';
+            elemento.title = motivo;
+            
+            // Adiciona uma classe para identificação visual
+            elemento.classList.add('campo-bloqueado');
+            
+            console.log(`🔒 Campo '${elemento.id}' foi bloqueado: ${motivo}`);
+        }
     }
 
     // Função para preencher os campos do formulário
@@ -317,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             // Converte valor numérico para formato monetário brasileiro
                             let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
-                            console.log(`�� Valor numérico extraído: ${valorNumerico}`);
+                            console.log(`🔢 Valor numérico extraído: ${valorNumerico}`);
 
                             // Formata para moeda brasileira
                             const valorFormatado = valorNumerico.toFixed(2)
@@ -328,6 +345,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             elemento.value = valorFinal;
                             console.log(`💰 Valor formatado final: ${valorFinal}`);
                         }
+                        
+                        // BLOQUEIA O CAMPO DE VALOR
+                        bloquearCampo(elemento, 'Valor definido via URL - não pode ser alterado');
+                        break;
+
+                    case 'nomeEvento':
+                        elemento.value = valorDecodificado;
+                        
+                        // BLOQUEIA O CAMPO DO NOME DO EVENTO
+                        bloquearCampo(elemento, 'Nome do evento definido via URL - não pode ser alterado');
                         break;
 
                     case 'formaPagamento':
@@ -461,8 +488,13 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = value;
     });
 
-    // Máscara para Valor (Moeda)
+    // Máscara para Valor (Moeda) - MODIFICADA para verificar se o campo está bloqueado
     document.getElementById('valor').addEventListener('input', function(e) {
+        // Verifica se o campo está bloqueado
+        if (e.target.classList.contains('campo-bloqueado')) {
+            return; // Não aplica a máscara se o campo estiver bloqueado
+        }
+
         let value = e.target.value.replace(/\D/g, '');
         if (!value) {
             e.target.value = '';
@@ -481,6 +513,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('valor').addEventListener('blur', function(e) {
+        // Verifica se o campo está bloqueado
+        if (e.target.classList.contains('campo-bloqueado')) {
+            return; // Não aplica a formatação se o campo estiver bloqueado
+        }
+
         let value = e.target.value;
         if (value && !value.startsWith('R\$ ')) {
             let numericValue = value.replace(/\D/g, '');
