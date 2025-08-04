@@ -92,25 +92,21 @@
                         <small class="campo-info">Este é o valor que você deseja receber (sem taxas)</small>
                     </div>
 
-                    <!-- NOVO: Campo Forma de Pagamento -->
+                    <!-- Campo Forma de Pagamento Atualizado -->
                     <div class="form-group">
                         <label for="formaPagamento">Forma de Pagamento *</label>
                         <select id="formaPagamento" name="formaPagamento" required>
                             <option value="">Selecione a forma de pagamento</option>
-                            <optgroup label="💳 Cartão de Crédito">
-                                <option value="cc_vista">À vista (R\$ 0,49 + 3,99%)</option>
-                                <option value="cc_2_6">2 a 6 parcelas (R\$ 0,49 + 4,49%)</option>
-                                <option value="cc_7_12">7 a 12 parcelas (R\$ 0,49 + 4,99%)</option>
-                                <option value="cc_13_21">13 a 21 parcelas (R\$ 0,49 + 5,29%)</option>
+                            <optgroup label="💳 Cartão de Crédito" id="optgroup-cartao">
+                                <!-- Opções serão geradas dinamicamente -->
                             </optgroup>
-                            <optgroup label="📱 PIX">
-                                <option value="pix_vista">À vista (sem acréscimo)</option>
-                                <option value="pix_2_3">2 a 3 parcelas (R\$ 1,99 + 2%)</option>
+                            <optgroup label="📱 PIX" id="optgroup-pix">
+                                <!-- Opções serão geradas dinamicamente -->
                             </optgroup>
                         </select>
                     </div>
 
-                    <!-- NOVO: Campo Valor Calculado -->
+                    <!-- Campo Valor Calculado -->
                     <div class="form-group">
                         <label for="valorCalculado">Valor Total a Pagar</label>
                         <input type="text" id="valorCalculado" name="valorCalculado" readonly 
