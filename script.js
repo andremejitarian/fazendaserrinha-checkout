@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (valorLiquido <= 0) {
             // Se não há valor, mostra opções genéricas
-            optgroupCartao.innerHTML = '<option value="" disabled>Informe um valor primeiro</option>';
+            optgroupCartao.innerHTML = '<option value="" disabled selected>Informe um valor primeiro</option>';
             optgroupPix.innerHTML = '<option value="" disabled>Informe um valor primeiro</option>';
             return;
         }
@@ -157,8 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log(`🔄 Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
         
-        // Regenera as opções do dropdown
-        gerarOpcoesDropdown();
+        // A linha 'gerarOpcoesDropdown()' FOI REMOVIDA DAQUI para evitar que o dropdown seja recarregado
+        // durante a seleção, o que impedia a seleção da opção.
         
         if (!formaPagamento) {
             campoValorCalculado.value = '';
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        console.log('🔄 Preenchendo campos automaticamente...');
+        console.log('�� Preenchendo campos automaticamente...');
         
         // Preenche cada campo encontrado
         Object.entries(parametros).forEach(([campo, valor]) => {
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             const valorFinal = 'R\$ ' + valorFormatado;
                             elemento.value = valorFinal;
-                            console.log(`💰 Valor formatado final: ${valorFinal}`);
+                            console.log(`�� Valor formatado final: ${valorFinal}`);
                         }
                         break;
                         
@@ -340,6 +340,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Atualiza o cálculo após preencher os campos
         setTimeout(() => {
+            // Garante que as opções do dropdown sejam geradas após o valor ser preenchido
+            gerarOpcoesDropdown(); 
             atualizarValorCalculado();
         }, 100);
         
@@ -442,7 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let value = e.target.value.replace(/\D/g, '');
         if (!value) {
             e.target.value = '';
-            atualizarValorCalculado(); // Atualiza cálculo quando valor é limpo
+            gerarOpcoesDropdown(); // Chamar aqui para limpar as opções quando o valor é vazio
+            atualizarValorCalculado(); 
             return;
         }
         value = (parseInt(value) / 100).toFixed(2);
@@ -450,7 +453,8 @@ document.addEventListener('DOMContentLoaded', () => {
         value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         e.target.value = 'R\$ ' + value;
         
-        // Atualiza o valor calculado em tempo real
+        // Atualiza as opções do dropdown e o valor calculado em tempo real
+        gerarOpcoesDropdown(); // Adicionado aqui para recalcular as opções quando o valor muda
         atualizarValorCalculado();
     });
 
@@ -742,4 +746,9 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarMensagem(`❌ Erro ao processar check-in: ${resultado.error}. Tente novamente.`, 'erro');
         }
     });
+
+    // Chamadas iniciais para garantir que o dropdown esteja populado 
+    // e o cálculo seja feito quando a página carrega, mesmo sem interação do usuário.
+    gerarOpcoesDropdown(); 
+    atualizarValorCalculado();
 });
