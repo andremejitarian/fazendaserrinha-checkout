@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('estadiaForm');
 
     // URL da webhook do n8n (apenas para envio final)
-    const WEBHOOK_URL = 'https://criadordigital-n8n-editor.kttqgl.easypanel.host/webhook-test/7a993f54-3b5d-4151-911e-f2e8c6d89e57';
+    const WEBHOOK_URL = 'https://criadordigital-n8n-webhook.kttqgl.easypanel.host/webhook/7a993f54-3b5d-4151-911e-f2e8c6d89e57';
 
     // ===== CONFIGURAÇÃO DAS TAXAS DE PAGAMENTO =====
 
