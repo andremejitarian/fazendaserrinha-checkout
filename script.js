@@ -113,6 +113,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return ''; // Retorna vazio se o tipo não for reconhecido
     }
 
+    // NOVA FUNÇÃO: Verificar se a data de chegada permite pagamento antecipado
+    function permitePagamentoAntecipado() {
+        const dataChegada = document.getElementById('dataChegada').value;
+        if (!dataChegada) return false;
+
+        const hoje = new Date();
+        const chegada = new Date(dataChegada);
+        const diferenca = chegada.getTime() - hoje.getTime();
+        const diasDiferenca = Math.ceil(diferenca / (1000 * 3600 * 24));
+
+        return diasDiferenca >= 30;
+    }
+
     // Função para gerar opções do dropdown dinamicamente
     function gerarOpcoesDropdown() {
         const campoValor = document.getElementById('valor');
@@ -167,6 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 optgroupPix.appendChild(option);
             }
         }
+
+        // NOVA OPÇÃO 1: PIX Antecipado com 5% de desconto (apenas se permitir)
+        if (permitePagamentoAntecipado()) {
+            const valorComDesconto = valorLiquido * 0.95;
+            const option1 = document.createElement('option');
+            option1.value = 'pix_antecipado';
+            option1.textContent = `PIX Antecipado (5% desconto) - ${formatarParaMoeda(valorComDesconto)}`;
+            optgroupPix.appendChild(option1);
+        }
+
+        // NOVA OPÇÃO 2: PIX Sinal (30% + 70%)
+        const valorSinal = valorLiquido * 0.30;
+        const valorRestante = valorLiquido * 0.70;
+        const option2 = document.createElement('option');
+        option2.value = 'pix_sinal';
+        option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)})`;
+        optgroupPix.appendChild(option2);
     }
 
     // Função para atualizar o valor calculado
@@ -200,7 +230,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Parse da forma de pagamento selecionada
+        // NOVA LÓGICA: Verificar se é uma das novas formas de pagamento
+        if (formaPagamento === 'pix_antecipado') {
+            const valorComDesconto = valorLiquido * 0.95;
+            campoValorCalculado.value = formatarParaMoeda(valorComDesconto);
+            campoValorCalculado.placeholder = '';
+            return;
+        }
+
+        if (formaPagamento === 'pix_sinal') {
+            campoValorCalculado.value = formatarParaMoeda(valorLiquido);
+            campoValorCalculado.placeholder = '';
+            return;
+        }
+
+        // Parse da forma de pagamento selecionada (lógica original)
         const [tipo, parcelas] = formaPagamento.split('_');
         const calculo = calcularValorComTaxas(valorLiquido, tipo, parseInt(parcelas));
 
@@ -223,6 +267,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function obterDadosFormaPagamento(formaPagamento) {
         if (!formaPagamento) return null;
 
+        // NOVA LÓGICA: Verificar se é uma das novas formas de pagamento
+        if (formaPagamento === 'pix_antecipado') {
+            return {
+                tipo: 'pix_antecipado',
+                parcelas: 1,
+                nome: 'PIX Antecipado com 5% de desconto',
+                taxa: { taxaFixa: 0, taxaPercentual: 0 }
+            };
+        }
+
+        if (formaPagamento === 'pix_sinal') {
+            return {
+                tipo: 'pix_sinal',
+                parcelas: 1,
+                nome: 'PIX Sinal - 30% + 70% no check-out',
+                taxa: { taxaFixa: 0, taxaPercentual: 0 }
+            };
+        }
+
+        // Lógica original para outras formas de pagamento
         const [tipo, parcelas] = formaPagamento.split('_');
         const parcelasNum = parseInt(parcelas);
 
@@ -538,6 +602,13 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarValorCalculado();
     });
 
+    // NOVO: Event listener para mudanças na data de chegada (para recalcular opções de pagamento)
+    document.getElementById('dataChegada').addEventListener('change', function(e) {
+        console.log(`📅 Data de chegada alterada para: ${e.target.value}`);
+        gerarOpcoesDropdown();
+        atualizarValorCalculado();
+    });
+
     // ===== VALIDAÇÃO DE CPF LOCAL =====
     function validarCPF(cpf) {
         // Remove possíveis caracteres de formatação
@@ -665,6 +736,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Coleta os dados do formulário
         const dadosFormaPagamento = obterDadosFormaPagamento(document.getElementById('formaPagamento').value);
+        const valorLiquido = converterValorParaNumero(document.getElementById('valor').value);
+
+        // NOVA LÓGICA: Calcular valorCalculadoNumerico baseado na forma de pagamento
+        let valorCalculadoNumerico;
+        const formaPagamento = document.getElementById('formaPagamento').value;
+
+        if (formaPagamento === 'pix_antecipado') {
+            valorCalculadoNumerico = valorLiquido * 0.95;
+        } else if (formaPagamento === 'pix_sinal') {
+            valorCalculadoNumerico = valorLiquido;
+        } else {
+            valorCalculadoNumerico = extrairValorNumerico(document.getElementById('valorCalculado').value);
+        }
 
         const formData = {
             nomeCompleto: document.getElementById('nomeCompleto').value.trim(),
@@ -675,13 +759,13 @@ document.addEventListener('DOMContentLoaded', () => {
             celularLimpo: document.getElementById('celular').value.replace(/[^\d]/g, ''),
             nomeEvento: document.getElementById('nomeEvento').value.trim(),
             valor: document.getElementById('valor').value,
-            valorNumerico: converterValorParaNumero(document.getElementById('valor').value),
-            formaPagamento: document.getElementById('formaPagamento').value,
+            valorNumerico: valorLiquido,
+            formaPagamento: formaPagamento,
             formaPagamentoTipo: dadosFormaPagamento?.tipo || '',
             formaPagamentoParcelas: dadosFormaPagamento?.parcelas || 0,
             formaPagamentoNome: dadosFormaPagamento?.nome || '',
             valorCalculado: document.getElementById('valorCalculado').value,
-            valorCalculadoNumerico: extrairValorNumerico(document.getElementById('valorCalculado').value),
+            valorCalculadoNumerico: valorCalculadoNumerico,
             dataChegada: document.getElementById('dataChegada').value,
             dataSaida: document.getElementById('dataSaida').value,
             aceitoRegulamento: document.getElementById('aceitoRegulamento').checked,
@@ -746,6 +830,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!formData.formaPagamento) {
             restaurarBotao();
             mostrarMensagem('Por favor, selecione uma forma de pagamento.', 'erro');
+            return;
+        }
+
+        // NOVA VALIDAÇÃO: Para PIX antecipado, verificar se ainda está dentro do prazo
+        if (formData.formaPagamento === 'pix_antecipado' && !permitePagamentoAntecipado()) {
+            restaurarBotao();
+            mostrarMensagem('O pagamento antecipado com desconto só está disponível até 30 dias antes da data de chegada.', 'erro');
             return;
         }
 
