@@ -522,6 +522,42 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('welcomeScreen').classList.add('active');
     }
 
+    // NOVA FUNÇÃO: Mostrar a tela de pagamento
+    window.showPaymentScreen = function(paymentUrl) {
+        // Esconde todas as outras telas
+        document.getElementById('welcomeScreen').classList.remove('active');
+        document.getElementById('formScreen').classList.remove('active');
+        
+        // Mostra a tela de pagamento
+        document.getElementById('paymentScreen').classList.add('active');
+        
+        // Atualiza o link do botão de pagamento
+        const paymentButton = document.getElementById('paymentButton');
+        if (paymentButton && paymentUrl) {
+            paymentButton.href = paymentUrl;
+            console.log('🔗 Link de pagamento configurado:', paymentUrl);
+        }
+    }
+
+    // NOVA FUNÇÃO: Voltar para o início (reiniciar processo)
+    window.restartProcess = function() {
+        // Limpa o formulário
+        form.reset();
+        document.getElementById('valorCalculado').value = '';
+        document.getElementById('valorCalculado').placeholder = 'Selecione uma forma de pagamento';
+        
+        // Limpa as opções do dropdown
+        document.getElementById('optgroup-cartao').innerHTML = '';
+        document.getElementById('optgroup-pix').innerHTML = '';
+        
+        // Volta para a tela inicial
+        document.getElementById('paymentScreen').classList.remove('active');
+        document.getElementById('formScreen').classList.remove('active');
+        document.getElementById('welcomeScreen').classList.add('active');
+        
+        console.log('🔄 Processo reiniciado');
+    }
+
     // ===== MÁSCARAS DE FORMATAÇÃO =====
 
     // Máscara para CPF
@@ -881,16 +917,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (resultado.success) {
             restaurarBotao();
-            mostrarMensagem('✅ Check-in realizado com sucesso! Dados enviados para processamento.');
-            setTimeout(() => {
-                form.reset();
-                document.getElementById('valorCalculado').value = '';
-                document.getElementById('valorCalculado').placeholder = 'Selecione uma forma de pagamento';
-                // Limpa as opções do dropdown
-                document.getElementById('optgroup-cartao').innerHTML = '';
-                document.getElementById('optgroup-pix').innerHTML = '';
-                showWelcomeScreen();
-            }, 3000);
+            
+            // NOVA LÓGICA: Verifica se a resposta contém uma URL de pagamento
+            let paymentUrl = null;
+            
+            // Tenta extrair a URL da resposta (pode vir em diferentes formatos)
+            if (typeof resultado.data === 'string') {
+                // Se a resposta é uma string, assume que é a URL diretamente
+                paymentUrl = resultado.data.trim();
+            } else if (resultado.data && typeof resultado.data === 'object') {
+                // Se a resposta é um objeto, procura por campos comuns de URL
+                paymentUrl = resultado.data.url || 
+                           resultado.data.payment_url || 
+                           resultado.data.link || 
+                           resultado.data.checkout_url ||
+                           resultado.data.paymentUrl;
+            }
+            
+            console.log('🔗 URL de pagamento extraída:', paymentUrl);
+            
+            // Valida se a URL é válida
+            if (paymentUrl && (paymentUrl.startsWith('http://') || paymentUrl.startsWith('https://'))) {
+                // Mostra a tela de pagamento com a URL
+                showPaymentScreen(paymentUrl);
+            } else {
+                // Fallback: se não conseguir extrair a URL, mostra mensagem de sucesso e volta ao início
+                mostrarMensagem('✅ Check-in realizado com sucesso! Dados enviados para processamento.');
+                setTimeout(() => {
+                    restartProcess();
+                }, 3000);
+            }
+            
         } else {
             restaurarBotao();
             mostrarMensagem(`❌ Erro ao processar check-in: ${resultado.error}. Tente novamente.`, 'erro');
