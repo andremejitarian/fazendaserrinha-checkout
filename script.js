@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fórmula: V_bruto = (V_liquido + T_fixa) / (1 - P_percentual)
-        const valorBrutoOriginal = ((valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual)).toFixed(2);
+        const valorBrutoOriginal = (valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual);
 
         // --- INÍCIO DA NOVA CORREÇÃO DE ARREDONDAMENTO (todas as parcelas arredondadas para cima) ---
 
