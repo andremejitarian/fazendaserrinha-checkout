@@ -18,9 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             12: { nome: 'Cartão - 12 parcelas', taxaFixa: 0.49, taxaPercentual: 0.0499 }
         },
         pix: {
-            1: { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0000 },
-            2: { nome: 'PIX - 2 parcelas', taxaFixa: 1.99, taxaPercentual: 0.0200 },
-            3: { nome: 'PIX - 3 parcelas', taxaFixa: 1.99, taxaPercentual: 0.0200 }
+            1: { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0000 }
         }
     };
 
