@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (parcelas === 1) {
                     option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
                 } else {
-                    option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                    option.textContent = `${parcelas} parcelas sem juros no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
                 }
 
                 optgroupCartao.appendChild(option);
