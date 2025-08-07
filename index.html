@@ -141,6 +141,41 @@
         </main>
     </div>
 
+    <!-- TERCEIRA TELA: Tela de Pagamento -->
+    <div id="paymentScreen" class="screen">
+        <div class="header-background"></div>
+
+        <div class="main-screen-card">
+            <div class="logo-container">
+                <img src="images/logo.png" alt="Logo Fazenda Serrinha" class="logo-image">
+            </div>
+
+            <div class="content-section">
+                <div class="success-icon">✅</div>
+                <h1>Reserva Confirmada!</h1>
+                <p>Parabéns! Sua reserva foi processada com sucesso. Agora você precisa efetuar o pagamento para garantir sua hospedagem na Fazenda Serrinha.</p>
+                
+                <div class="payment-info">
+                    <p><strong>Próximo passo:</strong> Clique no botão abaixo para acessar a página de pagamento seguro e finalizar sua reserva.</p>
+                </div>
+                
+                <div class="button-group">
+                    <a id="paymentButton" href="#"  class="button-advance payment-button">
+                        Pagar Agora <span class="arrow">💳</span>
+                    </a>
+                    
+                    <button class="button-secondary" onclick="restartProcess()">
+                        Fazer Nova Reserva
+                    </button>
+                </div>
+
+                <div class="payment-note">
+                    <p><small>💡 <strong>Importante:</strong> O link de pagamento abrirá em uma nova aba. Mantenha esta página aberta caso precise fazer uma nova reserva.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
