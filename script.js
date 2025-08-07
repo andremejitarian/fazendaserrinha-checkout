@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fórmula: V_bruto = (V_liquido + T_fixa) / (1 - P_percentual)
-        const valorBrutoOriginal = (valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual);
+        const valorBrutoOriginal = ((valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual)).toFixed(2);
 
         // --- INÍCIO DA NOVA CORREÇÃO DE ARREDONDAMENTO (todas as parcelas arredondadas para cima) ---
 
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (parcelas === 1) {
                     option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
                 } else {
-                    option.textContent = `${parcelas} parcelas sem juros no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                    option.textContent = `Até ${parcelas} parcelas sem juros no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
                 }
 
                 optgroupCartao.appendChild(option);
