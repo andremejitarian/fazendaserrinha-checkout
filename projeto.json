@@ -1,0 +1,25 @@
+{
+  "projetos": {
+    "fazenda_serrinha": {
+      "nome": "Fazenda Serrinha",
+      "formas_pagamento_permitidas": ["cartao", "pix", "pix_antecipado", "pix_sinal"],
+      "descricao": "Projeto principal da fazenda com todas as opções de pagamento"
+    },
+    "retiro_espiritual": {
+      "nome": "Retiro Espiritual",
+      "formas_pagamento_permitidas": ["pix", "pix_sinal"],
+      "descricao": "Projeto focado em retiros, apenas PIX"
+    },
+    "evento_corporativo": {
+      "nome": "Evento Corporativo",
+      "formas_pagamento_permitidas": ["cartao", "pix"],
+      "descricao": "Eventos empresariais com pagamento tradicional"
+    },
+    "acampamento_jovens": {
+      "nome": "Acampamento de Jovens",
+      "formas_pagamento_permitidas": ["pix", "pix_antecipado"],
+      "descricao": "Acampamento com desconto antecipado"
+    }
+  },
+  "ultima_atualizacao": "2025-01-08T18:30:00Z"
+}
