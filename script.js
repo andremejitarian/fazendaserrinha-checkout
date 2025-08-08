@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (formaPagamento === 'pix_sinal') {
-            campoValorCalculado.value = formatarParaMoeda(valorLiquido);
+            campoValorCalculado.value = formatarParaMoeda(valorLiquido * 0.92);
             campoValorCalculado.placeholder = '';
             return;
         }
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tipo: 'pix_sinal',
                 parcelas: 1,
                 nome: 'PIX Sinal - 30% + 70% no check-out',
-                taxa: { taxaFixa: 0, taxaPercentual: 0.0399 }
+                taxa: { taxaFixa: 0, taxaPercentual: 0 }
             };
         }
 
