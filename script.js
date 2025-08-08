@@ -151,23 +151,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Gera opções para PIX
-        for (let parcelas = 1; parcelas <= 3; parcelas++) {
-            const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
-            if (calculo) {
-                const option = document.createElement('option');
-                option.value = `pix_${parcelas}`;
+// Gera opções para PIX
+for (let parcelas = 1; parcelas <= 3; parcelas++) {
+    // NOVA LÓGICA: Pula PIX à vista (pix_1) se estiver com 30 dias ou mais da chegada
+    if (parcelas === 1 && !permitePagamentoPIXVista()) {
+        continue; // Pula a criação da opção pix_1
+    }
 
-                const tipoPagamento = getPaymentTypeName('pix'); // "PIX"
-                if (parcelas === 1) {
-                    option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
-                } else {
-                    option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
-                }
+    const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
+    if (calculo) {
+        const option = document.createElement('option');
+        option.value = `pix_${parcelas}`;
 
-                optgroupPix.appendChild(option);
-            }
+        const tipoPagamento = getPaymentTypeName('pix'); // "PIX"
+        if (parcelas === 1) {
+            option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
+        } else {
+            option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
         }
+
+        optgroupPix.appendChild(option);
+    }
+}
 
         // NOVA OPÇÃO 1: PIX Antecipado com 5% de desconto (apenas se permitir)
         if (permitePagamentoAntecipado()) {
@@ -177,6 +182,19 @@ document.addEventListener('DOMContentLoaded', () => {
             option1.textContent = `PIX Antecipado (5% desconto) - ${formatarParaMoeda(valorComDesconto)}`;
             optgroupPix.appendChild(option1);
         }
+
+// NOVA FUNÇÃO: Verificar se a data de chegada permite pagamento PIX à vista
+function permitePagamentoPIXVista() {
+    const dataChegada = document.getElementById('dataChegada').value;
+    if (!dataChegada) return true; // Se não há data, permite por padrão
+
+    const hoje = new Date();
+    const chegada = new Date(dataChegada);
+    const diferenca = chegada.getTime() - hoje.getTime();
+    const diasDiferenca = Math.ceil(diferenca / (1000 * 3600 * 24));
+
+    return diasDiferenca < 30; // Permite PIX à vista apenas se for MENOS de 30 dias
+}
 
         // NOVA OPÇÃO 2: PIX Sinal (30% + 70%)
         const valorSinal = valorLiquido * 0.30 * 0.92;
