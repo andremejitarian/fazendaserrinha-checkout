@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             6: { nome: 'Cartão - até 6 parcelas sem juros', taxaFixa: 0.00, taxaPercentual: 0.00 }
         },
         pix: {
-            1: { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0000 }
+            1: { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0799 }
         }
     };
 
