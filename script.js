@@ -1,8 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('estadiaForm');
 
     // URL da webhook do n8n (apenas para envio final)
     const WEBHOOK_URL = 'https://criadordigital-n8n-webhook.kttqgl.easypanel.host/webhook/7a993f54-3b5d-4151-911e-f2e8c6d89e57';
+
+    // URL das políticas de cancelamento
+    const POLITICAS_URL = 'https://raw.githubusercontent.com/andremejitarian/fazendaserrinha-checkout/d1543ebcafb3d484bbc179cf8a42d9189f3d6a26/politica_cancelamento.json';
+    let politicasData = null;
 
     // ===== CONFIGURAÇÃO DAS TAXAS DE PAGAMENTO =====
 
@@ -15,6 +19,117 @@ document.addEventListener('DOMContentLoaded', () => {
             1: { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.08 }
         }
     };
+
+    // ===== FUNÇÕES DE POLÍTICA DE CANCELAMENTO =====
+
+    // NOVA FUNÇÃO: Carregar políticas de cancelamento
+    async function carregarPoliticas() {
+        try {
+            console.log('📋 Carregando políticas de cancelamento...');
+            const response = await fetch(POLITICAS_URL);
+            
+            if (!response.ok) {
+                throw new Error(`Erro ao carregar políticas: ${response.status}`);
+            }
+            
+            politicasData = await response.json();
+            console.log('✅ Políticas carregadas com sucesso:', politicasData);
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Erro ao carregar políticas:', error);
+            
+            // Fallback com políticas padrão
+            politicasData = {
+                "politicas": {
+                    "1": {
+                        "titulo": "Política de Cancelamento - PIX Antecipado",
+                        "texto": "⚠️ **Atenção**: Pagamentos antecipados via PIX não são reembolsáveis. Em caso de cancelamento, será emitido um voucher válido por 12 meses para uso em futuras estadias.",
+                        "aplicavel_para": ["pix_antecipado"]
+                    },
+                    "2": {
+                        "titulo": "Política de Cancelamento - PIX Sinal",
+                        "texto": "📋 **Cancelamento**: Cancelamentos até 15 dias antes da data de chegada: reembolso de 80% do valor pago. Cancelamentos com menos de 15 dias: sem reembolso, mas possibilidade de reagendamento sujeito à disponibilidade.",
+                        "aplicavel_para": ["pix_sinal"]
+                    },
+                    "3": {
+                        "titulo": "Política de Cancelamento - Outras Formas",
+                        "texto": "🔄 **Cancelamento Flexível**: Cancelamentos até 7 dias antes da chegada: reembolso integral. Entre 3-7 dias: reembolso de 50%. Menos de 3 dias: sem reembolso, mas possibilidade de reagendamento.",
+                        "aplicavel_para": ["cartao", "pix_1", "outras"]
+                    }
+                }
+            };
+            
+            console.log('📋 Usando políticas padrão como fallback');
+            return false;
+        }
+    }
+
+    // NOVA FUNÇÃO: Determinar qual política aplicar
+    function determinarPolitica(formaPagamento) {
+        if (!politicasData || !formaPagamento) {
+            return null;
+        }
+        
+        // Regras conforme especificado
+        if (formaPagamento === 'pix_antecipado') {
+            return politicasData.politicas['1'];
+        } else if (formaPagamento === 'pix_sinal') {
+            return politicasData.politicas['2'];
+        } else {
+            // Todas as outras formas de pagamento
+            return politicasData.politicas['3'];
+        }
+    }
+
+    // NOVA FUNÇÃO: Exibir política de cancelamento
+    function exibirPoliticaCancelamento(formaPagamento) {
+        const container = document.getElementById('politicaCancelamento');
+        const titulo = document.getElementById('politicaTitulo');
+        const texto = document.getElementById('politicaTexto');
+        
+        if (!container || !titulo || !texto) {
+            console.warn('⚠️ Elementos da política de cancelamento não encontrados');
+            return;
+        }
+        
+        if (!formaPagamento) {
+            // Esconde a política se não há forma de pagamento selecionada
+            container.style.display = 'none';
+            container.classList.remove('show');
+            return;
+        }
+        
+        const politica = determinarPolitica(formaPagamento);
+        
+        if (!politica) {
+            console.warn('⚠️ Política não encontrada para:', formaPagamento);
+            container.style.display = 'none';
+            container.classList.remove('show');
+            return;
+        }
+        
+        // Atualiza o conteúdo
+        titulo.textContent = politica.titulo;
+        
+        // Converte markdown básico para HTML
+        let textoHTML = politica.texto
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **texto** -> <strong>texto</strong>
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // *texto* -> <em>texto</em>
+            .replace(/\n/g, '<br>'); // quebras de linha
+        
+        texto.innerHTML = textoHTML;
+        
+        // Mostra a política com animação
+        container.style.display = 'block';
+        
+        // Pequeno delay para garantir que o display seja aplicado antes da animação
+        setTimeout(() => {
+            container.classList.add('show');
+        }, 10);
+        
+        console.log(`📋 Política exibida: ${politica.titulo} para ${formaPagamento}`);
+    }
 
     // ===== FUNÇÕES DE CÁLCULO DE TAXAS =====
 
@@ -82,9 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function extrairValorNumerico(valorFormatado) {
         if (!valorFormatado) return 0;
 
-        // Remove R\$, espaços, pontos (milhares) e converte vírgula para ponto
+        // Remove R$, espaços, pontos (milhares) e converte vírgula para ponto
         let valor = valorFormatado
-            .replace(/R\$\s?/g, '')
+            .replace(/R$\s?/g, '')
             .replace(/\./g, '')
             .replace(',', '.');
 
@@ -112,6 +227,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const diasDiferenca = Math.ceil(diferenca / (1000 * 3600 * 24));
 
         return diasDiferenca >= 30;
+    }
+
+    // NOVA FUNÇÃO: Verificar se a data de chegada permite pagamento PIX à vista
+    function permitePagamentoPIXVista() {
+        const dataChegada = document.getElementById('dataChegada').value;
+        if (!dataChegada) return true; // Se não há data, permite por padrão
+
+        const hoje = new Date();
+        const chegada = new Date(dataChegada);
+        const diferenca = chegada.getTime() - hoje.getTime();
+        const diasDiferenca = Math.ceil(diferenca / (1000 * 3600 * 24));
+
+        return diasDiferenca < 30; // Permite PIX à vista apenas se for MENOS de 30 dias
     }
 
     // Função para gerar opções do dropdown dinamicamente
@@ -151,28 +279,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-// Gera opções para PIX
-for (let parcelas = 1; parcelas <= 3; parcelas++) {
-    // NOVA LÓGICA: Pula PIX à vista (pix_1) se estiver com 30 dias ou mais da chegada
-    if (parcelas === 1 && !permitePagamentoPIXVista()) {
-        continue; // Pula a criação da opção pix_1
-    }
+        // Gera opções para PIX
+        for (let parcelas = 1; parcelas <= 3; parcelas++) {
+            // NOVA LÓGICA: Pula PIX à vista (pix_1) se estiver com 30 dias ou mais da chegada
+            if (parcelas === 1 && !permitePagamentoPIXVista()) {
+                continue; // Pula a criação da opção pix_1
+            }
 
-    const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
-    if (calculo) {
-        const option = document.createElement('option');
-        option.value = `pix_${parcelas}`;
+            const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
+            if (calculo) {
+                const option = document.createElement('option');
+                option.value = `pix_${parcelas}`;
 
-        const tipoPagamento = getPaymentTypeName('pix'); // "PIX"
-        if (parcelas === 1) {
-            option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
-        } else {
-            option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                const tipoPagamento = getPaymentTypeName('pix'); // "PIX"
+                if (parcelas === 1) {
+                    option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
+                } else {
+                    option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                }
+
+                optgroupPix.appendChild(option);
+            }
         }
-
-        optgroupPix.appendChild(option);
-    }
-}
 
         // NOVA OPÇÃO 1: PIX Antecipado com 5% de desconto (apenas se permitir)
         if (permitePagamentoAntecipado()) {
@@ -182,19 +310,6 @@ for (let parcelas = 1; parcelas <= 3; parcelas++) {
             option1.textContent = `PIX Antecipado - ${formatarParaMoeda(valorComDesconto)}`;
             optgroupPix.appendChild(option1);
         }
-
-// NOVA FUNÇÃO: Verificar se a data de chegada permite pagamento PIX à vista
-function permitePagamentoPIXVista() {
-    const dataChegada = document.getElementById('dataChegada').value;
-    if (!dataChegada) return true; // Se não há data, permite por padrão
-
-    const hoje = new Date();
-    const chegada = new Date(dataChegada);
-    const diferenca = chegada.getTime() - hoje.getTime();
-    const diasDiferenca = Math.ceil(diferenca / (1000 * 3600 * 24));
-
-    return diasDiferenca < 30; // Permite PIX à vista apenas se for MENOS de 30 dias
-}
 
         // NOVA OPÇÃO 2: PIX Sinal (30% + 70%)
         const valorSinal = valorLiquido * 0.30 * 0.92;
@@ -227,12 +342,18 @@ function permitePagamentoPIXVista() {
         if (!formaPagamento) {
             campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
+            
+            // NOVO: Esconde a política quando não há forma de pagamento
+            exibirPoliticaCancelamento(null);
             return;
         }
 
         if (valorLiquido <= 0) {
             campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Informe um valor válido';
+            
+            // NOVO: Esconde a política quando não há valor válido
+            exibirPoliticaCancelamento(null);
             return;
         }
 
@@ -241,12 +362,18 @@ function permitePagamentoPIXVista() {
             const valorComDesconto = valorLiquido * 0.87;
             campoValorCalculado.value = formatarParaMoeda(valorComDesconto);
             campoValorCalculado.placeholder = '';
+            
+            // NOVO: Exibe a política de cancelamento correspondente
+            exibirPoliticaCancelamento(formaPagamento);
             return;
         }
 
         if (formaPagamento === 'pix_sinal') {
             campoValorCalculado.value = formatarParaMoeda(valorLiquido * 0.92);
             campoValorCalculado.placeholder = '';
+            
+            // NOVO: Exibe a política de cancelamento correspondente
+            exibirPoliticaCancelamento(formaPagamento);
             return;
         }
 
@@ -267,6 +394,9 @@ function permitePagamentoPIXVista() {
             campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Erro no cálculo';
         }
+
+        // NOVO: Exibe a política de cancelamento correspondente
+        exibirPoliticaCancelamento(formaPagamento);
     }
 
     // Função para obter dados da forma de pagamento selecionada
@@ -397,10 +527,10 @@ function permitePagamentoPIXVista() {
                     case 'valor':
                         console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
 
-                        // Se o valor já tem R\$, usa diretamente
-                        if (valorDecodificado.includes('R\$')) {
+                        // Se o valor já tem R$, usa diretamente
+                        if (valorDecodificado.includes('R$')) {
                             elemento.value = valorDecodificado;
-                            console.log(`✅ Valor com R\$ aplicado diretamente: ${valorDecodificado}`);
+                            console.log(`✅ Valor com R$ aplicado diretamente: ${valorDecodificado}`);
                         } else {
                             // Converte valor numérico para formato monetário brasileiro
                             let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
@@ -411,7 +541,7 @@ function permitePagamentoPIXVista() {
                                 .replace('.', ',')
                                 .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-                            const valorFinal = 'R\$ ' + valorFormatado;
+                            const valorFinal = 'R$ ' + valorFormatado;
                             elemento.value = valorFinal;
                             console.log(`💰 Valor formatado final: ${valorFinal}`);
                         }
@@ -556,6 +686,13 @@ function permitePagamentoPIXVista() {
         document.getElementById('optgroup-cartao').innerHTML = '';
         document.getElementById('optgroup-pix').innerHTML = '';
         
+        // NOVO: Esconde a política de cancelamento
+        const container = document.getElementById('politicaCancelamento');
+        if (container) {
+            container.style.display = 'none';
+            container.classList.remove('show');
+        }
+        
         // Volta para a tela inicial
         document.getElementById('paymentScreen').classList.remove('active');
         document.getElementById('formScreen').classList.remove('active');
@@ -611,7 +748,7 @@ function permitePagamentoPIXVista() {
         value = (parseInt(value) / 100).toFixed(2);
         value = value.replace('.', ',');
         value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        e.target.value = 'R\$ ' + value;
+        e.target.value = 'R$ ' + value;
 
         // Atualiza as opções do dropdown e o valor calculado em tempo real
         gerarOpcoesDropdown(); // Adicionado aqui para recalcular as opções quando o valor muda
@@ -625,13 +762,13 @@ function permitePagamentoPIXVista() {
         }
 
         let value = e.target.value;
-        if (value && !value.startsWith('R\$ ')) {
+        if (value && !value.startsWith('R$ ')) {
             let numericValue = value.replace(/\D/g, '');
             if (numericValue) {
                 numericValue = (parseInt(numericValue) / 100).toFixed(2);
                 numericValue = numericValue.replace('.', ',');
                 numericValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                e.target.value = 'R\$ ' + numericValue;
+                e.target.value = 'R$ ' + numericValue;
             }
         }
         // Atualiza o valor calculado após perder o foco
@@ -694,7 +831,7 @@ function permitePagamentoPIXVista() {
 
     function converterValorParaNumero(valorFormatado) {
         if (!valorFormatado) return 0;
-        let valor = valorFormatado.replace(/R\$\s?/g, '').replace(/\./g, '');
+        let valor = valorFormatado.replace(/R$\s?/g, '').replace(/\./g, '');
         valor = valor.replace(',', '.');
         return parseFloat(valor) || 0;
     }
@@ -959,6 +1096,11 @@ function permitePagamentoPIXVista() {
             mostrarMensagem(`❌ Erro ao processar check-in: ${resultado.error}. Tente novamente.`, 'erro');
         }
     });
+
+    // ===== INICIALIZAÇÃO =====
+
+    // Carrega as políticas no início
+    await carregarPoliticas();
 
     // Chamadas iniciais para garantir que o dropdown esteja populado
     // e o cálculo seja feito quando a página carrega, mesmo sem interação do usuário.
