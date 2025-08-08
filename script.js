@@ -1272,16 +1272,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // ===== INICIALIZAÇÃO =====
+// ===== INICIALIZAÇÃO (CORRIGIDA) =====
 
-    // Carrega as políticas e projetos no início
-    await Promise.all([
-        carregarPoliticas(),
-        carregarProjetos()
-    ]);
+// Carrega as políticas e projetos no início
+await Promise.all([
+    carregarPoliticas(),
+    carregarProjetos()
+]);
 
-    // Chamadas iniciais para garantir que o dropdown esteja populado
-    // e o cálculo seja feito quando a página carrega, mesmo sem interação do usuário.
-    gerarOpcoesDropdown();
-    atualizarValorCalculado();
+// CORREÇÃO: Executa o preenchimento VIA URL APÓS carregar os dados
+preencherCamposViaURL();
+
+// Chamadas iniciais para garantir que o dropdown esteja populado
+// e o cálculo seja feito quando a página carrega, mesmo sem interação do usuário.
+gerarOpcoesDropdown();
+atualizarValorCalculado();
 });
