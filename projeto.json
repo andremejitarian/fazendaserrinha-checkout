@@ -12,7 +12,7 @@
     },
     "evento_corporativo": {
       "nome": "Evento Corporativo",
-      "formas_pagamento_permitidas": ["cartao", "pix"],
+      "formas_pagamento_permitidas": ["cartao", "pix","pix_A"],
       "descricao": "Eventos empresariais com pagamento tradicional"
     },
     "acampamento_jovens": {
