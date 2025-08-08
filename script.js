@@ -115,19 +115,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 // NOVA FUNÇÃO: Controlar visibilidade das opções de PIX
+// NOVA FUNÇÃO: Controlar visibilidade das opções de PIX
 function controlarVisibilidadePix() {
-    const pixAntecipado = document.querySelector('option[value="pix_antecipado"]');
-    const pix1 = document.querySelector('option[value="pix_1"]');
+    console.log('🔍 Executando controlarVisibilidadePix...');
     
-    if (pixAntecipado && pix1) {
-        if (pixAntecipado.style.display !== 'none') {
-            // Se pix_antecipado está visível, oculta pix_1
-            pix1.style.display = 'none';
+    // Aguarda um pouco para garantir que as opções foram criadas
+    setTimeout(() => {
+        const pixAntecipado = document.querySelector('option[value="pix_antecipado"]');
+        const pix1 = document.querySelector('option[value="pix_1"]');
+        
+        console.log('PIX Antecipado encontrado:', pixAntecipado);
+        console.log('PIX 1 encontrado:', pix1);
+        
+        if (pixAntecipado && pix1) {
+            // Verifica se pix_antecipado existe e não está oculto
+            const pixAntecipadoVisivel = pixAntecipado.offsetParent !== null;
+            
+            if (pixAntecipadoVisivel) {
+                console.log('🔒 Ocultando PIX 1 porque PIX Antecipado está visível');
+                pix1.style.display = 'none';
+            } else {
+                console.log('👁️ Mostrando PIX 1 porque PIX Antecipado está oculto');
+                pix1.style.display = '';
+            }
         } else {
-            // Se pix_antecipado está oculto, mostra pix_1
-            pix1.style.display = '';
+            console.log('⚠️ Não foi possível encontrar as opções PIX');
         }
-    }
+    }, 100);
 }
 
     // Função para gerar opções do dropdown dinamicamente
