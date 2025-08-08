@@ -82,9 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function extrairValorNumerico(valorFormatado) {
         if (!valorFormatado) return 0;
 
-        // Remove R$, espaços, pontos (milhares) e converte vírgula para ponto
+        // Remove R\$, espaços, pontos (milhares) e converte vírgula para ponto
         let valor = valorFormatado
-            .replace(/R$\s?/g, '')
+            .replace(/R\$\s?/g, '')
             .replace(/\./g, '')
             .replace(',', '.');
 
@@ -112,22 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const diasDiferenca = Math.ceil(diferenca / (1000 * 3600 * 24));
 
         return diasDiferenca >= 30;
-    }
-
-    // NOVA FUNÇÃO: Controlar visibilidade das opções de PIX
-    function controlarVisibilidadePix() {
-        const pixAntecipado = document.querySelector('option[value="pix_antecipado"]');
-        const pix1 = document.querySelector('option[value="pix_1"]');
-        
-        if (pixAntecipado && pix1) {
-            if (pixAntecipado.style.display !== 'none') {
-                // Se pix_antecipado está visível, oculta pix_1
-                pix1.style.display = 'none';
-            } else {
-                // Se pix_antecipado está oculto, mostra pix_1
-                pix1.style.display = '';
-            }
-        }
     }
 
     // Função para gerar opções do dropdown dinamicamente
@@ -201,9 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         option2.value = 'pix_sinal';
         option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)})`;
         optgroupPix.appendChild(option2);
-
-        // Aplica a regra de visibilidade após gerar as opções
-        controlarVisibilidadePix();
     }
 
     // Função para atualizar o valor calculado
@@ -398,10 +379,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'valor':
                         console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
 
-                        // Se o valor já tem R$, usa diretamente
-                        if (valorDecodificado.includes('R$')) {
+                        // Se o valor já tem R\$, usa diretamente
+                        if (valorDecodificado.includes('R\$')) {
                             elemento.value = valorDecodificado;
-                            console.log(`✅ Valor com R$ aplicado diretamente: ${valorDecodificado}`);
+                            console.log(`✅ Valor com R\$ aplicado diretamente: ${valorDecodificado}`);
                         } else {
                             // Converte valor numérico para formato monetário brasileiro
                             let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
@@ -412,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 .replace('.', ',')
                                 .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-                            const valorFinal = 'R$ ' + valorFormatado;
+                            const valorFinal = 'R\$ ' + valorFormatado;
                             elemento.value = valorFinal;
                             console.log(`💰 Valor formatado final: ${valorFinal}`);
                         }
@@ -612,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
         value = (parseInt(value) / 100).toFixed(2);
         value = value.replace('.', ',');
         value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        e.target.value = 'R$ ' + value;
+        e.target.value = 'R\$ ' + value;
 
         // Atualiza as opções do dropdown e o valor calculado em tempo real
         gerarOpcoesDropdown(); // Adicionado aqui para recalcular as opções quando o valor muda
@@ -626,13 +607,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let value = e.target.value;
-        if (value && !value.startsWith('R$ ')) {
+        if (value && !value.startsWith('R\$ ')) {
             let numericValue = value.replace(/\D/g, '');
             if (numericValue) {
                 numericValue = (parseInt(numericValue) / 100).toFixed(2);
                 numericValue = numericValue.replace('.', ',');
                 numericValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                e.target.value = 'R$ ' + numericValue;
+                e.target.value = 'R\$ ' + numericValue;
             }
         }
         // Atualiza o valor calculado após perder o foco
@@ -695,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function converterValorParaNumero(valorFormatado) {
         if (!valorFormatado) return 0;
-        let valor = valorFormatado.replace(/R$\s?/g, '').replace(/\./g, '');
+        let valor = valorFormatado.replace(/R\$\s?/g, '').replace(/\./g, '');
         valor = valor.replace(',', '.');
         return parseFloat(valor) || 0;
     }
