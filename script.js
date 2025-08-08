@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const taxasPagamento = {
         cartao: {
-            1: { nome: 'Cartão - À vista', taxaFixa: 0.49, taxaPercentual: 0.0399 },
+            1: { nome: 'Cartão - À vista', taxaFixa: 0.49, taxaPercentual: -0.0399 },
             6: { nome: 'Cartão - até 6 parcelas sem juros', taxaFixa: 0.00, taxaPercentual: 0.08 }
         },
         pix: {
