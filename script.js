@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // NOVA OPÇÃO 1: PIX Antecipado com 5% de desconto (apenas se permitir)
         if (permitePagamentoAntecipado()) {
-            const valorComDesconto = valorLiquido * 0.95;
+            const valorComDesconto = valorLiquido * 0.87;
             const option1 = document.createElement('option');
             option1.value = 'pix_antecipado';
             option1.textContent = `PIX Antecipado (5% desconto) - ${formatarParaMoeda(valorComDesconto)}`;
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // NOVA LÓGICA: Verificar se é uma das novas formas de pagamento
         if (formaPagamento === 'pix_antecipado') {
-            const valorComDesconto = valorLiquido * 0.90;
+            const valorComDesconto = valorLiquido * 0.87;
             campoValorCalculado.value = formatarParaMoeda(valorComDesconto);
             campoValorCalculado.placeholder = '';
             return;
