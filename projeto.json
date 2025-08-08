@@ -1,7 +1,7 @@
 {
   "projetos": {
     "fazenda_serrinha": {
-      "nome": "Fazenda Serrinha",
+      "nome": "Fazenda_Serrinha",
       "formas_pagamento_permitidas": ["cartao", "pix", "pix_antecipado", "pix_sinal"],
       "descricao": "Projeto principal da fazenda com todas as opções de pagamento"
     },
