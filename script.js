@@ -179,7 +179,7 @@ for (let parcelas = 1; parcelas <= 3; parcelas++) {
             const valorComDesconto = valorLiquido * 0.87;
             const option1 = document.createElement('option');
             option1.value = 'pix_antecipado';
-            option1.textContent = `PIX Antecipado (5% desconto) - ${formatarParaMoeda(valorComDesconto)}`;
+            option1.textContent = `PIX Antecipado - ${formatarParaMoeda(valorComDesconto)}`;
             optgroupPix.appendChild(option1);
         }
 
