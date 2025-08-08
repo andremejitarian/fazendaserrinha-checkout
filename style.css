@@ -270,6 +270,81 @@ input[readonly] {
     line-height: 1.4;
 }
 
+/* ===== ESTILOS PARA POLÍTICA DE CANCELAMENTO ===== */
+
+/* Container principal da política - seguindo o padrão dos form-groups */
+.politica-cancelamento {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 20px 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Header da política - seguindo o padrão dos h2 */
+.politica-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.politica-icone {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    color: #555;
+}
+
+.politica-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Texto da política - seguindo o padrão dos campos de informação */
+.politica-texto {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    margin: 0;
+}
+
+.politica-texto strong {
+    color: #333;
+    font-weight: 600;
+}
+
+.politica-texto em {
+    font-style: italic;
+    color: #666;
+}
+
+/* Animação de entrada - sutil como o resto do design */
+.politica-cancelamento.show {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ===== ESTILOS PARA PREENCHIMENTO VIA URL ===== */
 
 /* Destaque para campos preenchidos automaticamente */
@@ -405,10 +480,12 @@ input[readonly] {
         padding-left: 20px;
         padding-right: 20px;
     }
+    
     h2 {
         font-size: 1.1rem;
         margin-bottom: 20px;
     }
+    
     input[type="text"],
     input[type="email"],
     input[type="tel"],
@@ -430,10 +507,12 @@ input[readonly] {
         margin-top: 20px;
         margin-bottom: 15px;
     }
+    
     .checkbox-group label,
     .radio-group label {
         font-size: 0.9rem;
     }
+    
     .submit-button {
         padding: 12px 20px;
         font-size: 1rem;
@@ -446,6 +525,25 @@ input[readonly] {
     
     #valorCalculado {
         font-size: 1.05em !important;
+    }
+    
+    /* Ajustes da política para mobile */
+    .politica-cancelamento {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .politica-header h4 {
+        font-size: 0.9rem;
+    }
+    
+    .politica-texto {
+        font-size: 0.9rem;
+        padding: 12px;
+    }
+    
+    .politica-icone {
+        font-size: 1.1rem;
     }
 }
 
@@ -486,6 +584,7 @@ input[readonly] {
         border-radius: 0;
         box-shadow: none;
     }
+    
     .back-link {
         margin-bottom: 20px;
         font-size: 0.9rem;
@@ -502,6 +601,32 @@ input[readonly] {
     
     #valorCalculado {
         font-size: 1em !important;
+    }
+    
+    /* Ajustes da política para telas muito pequenas */
+    .politica-cancelamento {
+        padding: 12px;
+        margin: 12px 0;
+    }
+    
+    .politica-header {
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+    }
+    
+    .politica-header h4 {
+        font-size: 0.85rem;
+    }
+    
+    .politica-texto {
+        font-size: 0.85rem;
+        padding: 10px;
+        line-height: 1.5;
+    }
+    
+    .politica-icone {
+        font-size: 1rem;
+        margin-right: 8px;
     }
 }
 
