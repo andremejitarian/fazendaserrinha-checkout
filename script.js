@@ -179,8 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // NOVA OPÇÃO 2: PIX Sinal (30% + 70%)
-        const valorSinal = valorLiquido * 0.30;
-        const valorRestante = valorLiquido * 0.70;
+        const valorSinal = valorLiquido * 0.30 * 0.92;
+        const valorRestante = valorLiquido * 0.70 * 0.92;
         const option2 = document.createElement('option');
         option2.value = 'pix_sinal';
         option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)})`;
@@ -220,14 +220,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // NOVA LÓGICA: Verificar se é uma das novas formas de pagamento
         if (formaPagamento === 'pix_antecipado') {
-            const valorComDesconto = valorLiquido * 0.95;
+            const valorComDesconto = valorLiquido * 0.90;
             campoValorCalculado.value = formatarParaMoeda(valorComDesconto);
             campoValorCalculado.placeholder = '';
             return;
         }
 
         if (formaPagamento === 'pix_sinal') {
-            campoValorCalculado.value = formatarParaMoeda(valorLiquido);
+            campoValorCalculado.value = formatarParaMoeda(valorLiquido * 0.92);
             campoValorCalculado.placeholder = '';
             return;
         }
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tipo: 'pix_sinal',
                 parcelas: 1,
                 nome: 'PIX Sinal - 30% + 70% no check-out',
-                taxa: { taxaFixa: 0, taxaPercentual: 0.08 }
+                taxa: { taxaFixa: 0, taxaPercentual: 0 }
             };
         }
 
