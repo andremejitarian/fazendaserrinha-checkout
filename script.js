@@ -114,36 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return diasDiferenca >= 30;
     }
 
-// NOVA FUNÇÃO: Controlar visibilidade das opções de PIX
-// NOVA FUNÇÃO: Controlar visibilidade das opções de PIX
-function controlarVisibilidadePix() {
-    console.log('🔍 Executando controlarVisibilidadePix...');
-    
-    // Aguarda um pouco para garantir que as opções foram criadas
-    setTimeout(() => {
-        const pixAntecipado = document.querySelector('option[value="pix_antecipado"]');
-        const pix1 = document.querySelector('option[value="pix_1"]');
-        
-        console.log('PIX Antecipado encontrado:', pixAntecipado);
-        console.log('PIX 1 encontrado:', pix1);
-        
-        if (pixAntecipado && pix1) {
-            // Verifica se pix_antecipado existe e não está oculto
-            const pixAntecipadoVisivel = pixAntecipado.offsetParent !== null;
-            
-            if (pixAntecipadoVisivel) {
-                console.log('🔒 Ocultando PIX 1 porque PIX Antecipado está visível');
-                pix1.style.display = 'none';
-            } else {
-                console.log('👁️ Mostrando PIX 1 porque PIX Antecipado está oculto');
-                pix1.style.display = '';
-            }
-        } else {
-            console.log('⚠️ Não foi possível encontrar as opções PIX');
-        }
-    }, 100);
-}
-
     // Função para gerar opções do dropdown dinamicamente
     function gerarOpcoesDropdown() {
         const campoValor = document.getElementById('valor');
@@ -181,51 +151,41 @@ function controlarVisibilidadePix() {
             }
         }
 
-// Verifica se PIX antecipado estará disponível
-const pixAntecipadoDisponivel = permitePagamentoAntecipado();
+        // Gera opções para PIX
+        for (let parcelas = 1; parcelas <= 3; parcelas++) {
+            const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
+            if (calculo) {
+                const option = document.createElement('option');
+                option.value = `pix_${parcelas}`;
 
-// Gera opções para PIX
-for (let parcelas = 1; parcelas <= 3; parcelas++) {
-    const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
-    if (calculo) {
-        const option = document.createElement('option');
-        option.value = `pix_${parcelas}`;
+                const tipoPagamento = getPaymentTypeName('pix'); // "PIX"
+                if (parcelas === 1) {
+                    option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
+                } else {
+                    option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                }
 
-        const tipoPagamento = getPaymentTypeName('pix');
-        if (parcelas === 1) {
-            option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
-            
-            // APLICA A REGRA: Se PIX antecipado estiver disponível, oculta PIX 1
-            if (pixAntecipadoDisponivel) {
-                option.style.display = 'none';
+                optgroupPix.appendChild(option);
             }
-        } else {
-            option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
         }
 
-        optgroupPix.appendChild(option);
+        // NOVA OPÇÃO 1: PIX Antecipado com 5% de desconto (apenas se permitir)
+        if (permitePagamentoAntecipado()) {
+            const valorComDesconto = valorLiquido * 0.87;
+            const option1 = document.createElement('option');
+            option1.value = 'pix_antecipado';
+            option1.textContent = `PIX Antecipado (5% desconto) - ${formatarParaMoeda(valorComDesconto)}`;
+            optgroupPix.appendChild(option1);
+        }
+
+        // NOVA OPÇÃO 2: PIX Sinal (30% + 70%)
+        const valorSinal = valorLiquido * 0.30 * 0.92;
+        const valorRestante = valorLiquido * 0.70 * 0.92;
+        const option2 = document.createElement('option');
+        option2.value = 'pix_sinal';
+        option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)})`;
+        optgroupPix.appendChild(option2);
     }
-}
-
-// NOVA OPÇÃO 1: PIX Antecipado com 5% de desconto (apenas se permitir)
-if (pixAntecipadoDisponivel) {
-    const valorComDesconto = valorLiquido * 0.87;
-    const option1 = document.createElement('option');
-    option1.value = 'pix_antecipado';
-    option1.textContent = `PIX Antecipado (5% desconto) - ${formatarParaMoeda(valorComDesconto)}`;
-    optgroupPix.appendChild(option1);
-}
-
-// NOVA OPÇÃO 2: PIX Sinal (30% + 70%)
-const valorSinal = valorLiquido * 0.30 * 0.92;
-const valorRestante = valorLiquido * 0.70 * 0.92;
-const option2 = document.createElement('option');
-option2.value = 'pix_sinal';
-option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)})`;
-optgroupPix.appendChild(option2);
-
-// Aplica a regra de visibilidade após gerar as opções
-controlarVisibilidadePix();
 
     // Função para atualizar o valor calculado
     function atualizarValorCalculado() {
