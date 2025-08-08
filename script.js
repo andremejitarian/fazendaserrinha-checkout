@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // URL da webhook do n8n (apenas para envio final)
     const WEBHOOK_URL = 'https://criadordigital-n8n-webhook.kttqgl.easypanel.host/webhook/7a993f54-3b5d-4151-911e-f2e8c6d89e57';
 
-    // ===== VARIÁVEL GLOBAL PARA POLÍTICAS =====
+    // ===== VARIÁVEIS GLOBAIS =====
     let dadosPoliticas = {};
+    let dadosProjetos = {};
 
     // ===== CONFIGURAÇÃO DAS TAXAS DE PAGAMENTO =====
 
@@ -19,25 +20,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // ===== FUNÇÕES DE POLÍTICA DE CANCELAMENTO =====
+    // ===== FUNÇÃO PARA OBTER FORMAS DE PAGAMENTO PERMITIDAS =====
+    function obterFormasPagamentoPermitidas(projeto) {
+        // Ler do arquivo projeto.json carregado
+        if (dadosProjetos.projetos && dadosProjetos.projetos[projeto] && dadosProjetos.projetos[projeto].formas_pagamento_permitidas) {
+            return dadosProjetos.projetos[projeto].formas_pagamento_permitidas;
+        }
+        
+        // Fallback caso não encontre no JSON
+        console.warn(`Formas de pagamento não encontradas para o projeto: ${projeto}. Usando valor padrão: todas.`);
+        return ["cartao", "pix", "pix_antecipado", "pix_sinal"];
+    }
 
-    // NOVA FUNÇÃO: Carregar políticas de cancelamento
+    // ===== CARREGAMENTO DE DADOS =====
     async function carregarPoliticas() {
         try {
-            console.log('📋 Carregando políticas de cancelamento...');
             const response = await fetch('https://raw.githubusercontent.com/andremejitarian/fazendaserrinha-checkout/d1543ebcafb3d484bbc179cf8a42d9189f3d6a26/politica_cancelamento.json');
-            
-            if (!response.ok) {
-                throw new Error(`Erro ao carregar políticas: ${response.status}`);
-            }
-            
             dadosPoliticas = await response.json();
-            console.log('✅ Políticas carregadas com sucesso:', dadosPoliticas);
-            return true;
-            
+            console.log('Políticas carregadas:', dadosPoliticas);
         } catch (error) {
-            console.error('❌ Erro ao carregar políticas:', error);
-            
+            console.error('Erro ao carregar políticas:', error);
             // Fallback com políticas padrão
             dadosPoliticas = {
                 "politicas": {
@@ -58,11 +60,74 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
             };
-            
-            console.log('📋 Usando políticas padrão como fallback');
-            return false;
         }
     }
+
+    async function carregarProjetos() {
+        try {
+            const response = await fetch('https://raw.githubusercontent.com/andremejitarian/fazendaserrinha-checkout/main/projeto.json');
+            dadosProjetos = await response.json();
+            console.log('Dados de projetos carregados:', dadosProjetos);
+            preencherProjetos();
+        } catch (error) {
+            console.error('Erro ao carregar projetos:', error);
+            // Fallback com projetos padrão
+            dadosProjetos = {
+                "projetos": {
+                    "fazenda_serrinha": {
+                        "nome": "Fazenda Serrinha",
+                        "formas_pagamento_permitidas": ["cartao", "pix", "pix_antecipado", "pix_sinal"],
+                        "descricao": "Projeto principal da fazenda com todas as opções de pagamento"
+                    },
+                    "retiro_espiritual": {
+                        "nome": "Retiro Espiritual",
+                        "formas_pagamento_permitidas": ["pix", "pix_sinal"],
+                        "descricao": "Projeto focado em retiros, apenas PIX"
+                    }
+                }
+            };
+            preencherProjetos();
+        }
+    }
+
+    function preencherProjetos() {
+        const projetoSelect = document.getElementById('projeto');
+        projetoSelect.innerHTML = '<option value="">Selecione um projeto</option>';
+        
+        if (dadosProjetos.projetos) {
+            Object.entries(dadosProjetos.projetos).forEach(([key, projeto]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = projeto.nome;
+                option.title = projeto.descricao;
+                projetoSelect.appendChild(option);
+            });
+        }
+    }
+
+    // ===== FUNÇÃO PARA OBTER PROJETO + NOME COMBINADOS =====
+    function getProjetoCompleto() {
+        const projetoSelecionado = document.getElementById('projeto').value;
+        
+        if (!projetoSelecionado) {
+            return '';
+        }
+        
+        // Buscar o nome do projeto
+        let nomeProjeto = '';
+        if (dadosProjetos.projetos && dadosProjetos.projetos[projetoSelecionado]) {
+            nomeProjeto = dadosProjetos.projetos[projetoSelecionado].nome;
+        }
+        
+        // Retornar nome do projeto
+        if (nomeProjeto) {
+            return nomeProjeto;
+        }
+        
+        return '';
+    }
+
+    // ===== FUNÇÕES DE POLÍTICA DE CANCELAMENTO =====
 
     // NOVA FUNÇÃO: Determinar qual política aplicar
     function determinarPolitica(formaPagamento) {
@@ -248,10 +313,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         return diasDiferenca < 30; // Permite PIX à vista apenas se for MENOS de 30 dias
     }
 
-    // Função para gerar opções do dropdown dinamicamente
+    // ===== LÓGICA DE PAGAMENTO =====
+    function atualizarFormaPagamento() {
+        const projetoSelecionado = document.getElementById('projeto').value;
+        const formaPagamentoSelect = document.getElementById('formaPagamento');
+        
+        if (!projetoSelecionado) {
+            // Se não há projeto selecionado, limpa e desabilita
+            formaPagamentoSelect.value = '';
+            formaPagamentoSelect.innerHTML = '<option value="" disabled selected>Selecione um projeto primeiro</option>';
+            return;
+        }
+        
+        // Regenera as opções baseadas no projeto
+        gerarOpcoesDropdown();
+    }
+
+    // Função para gerar opções do dropdown dinamicamente (MODIFICADA)
     function gerarOpcoesDropdown() {
         const campoValor = document.getElementById('valor');
+        const campoProjeto = document.getElementById('projeto');
         const valorLiquido = extrairValorNumerico(campoValor.value);
+        const projetoSelecionado = campoProjeto.value;
 
         const optgroupCartao = document.getElementById('optgroup-cartao');
         const optgroupPix = document.getElementById('optgroup-pix');
@@ -260,70 +343,99 @@ document.addEventListener('DOMContentLoaded', async () => {
         optgroupCartao.innerHTML = '';
         optgroupPix.innerHTML = '';
 
+        // NOVA VALIDAÇÃO: Verifica se projeto foi selecionado
+        if (!projetoSelecionado) {
+            optgroupCartao.innerHTML = '<option value="" disabled>Selecione um projeto primeiro</option>';
+            optgroupPix.innerHTML = '<option value="" disabled>Selecione um projeto primeiro</option>';
+            return;
+        }
+
         if (valorLiquido <= 0) {
-            // Se não há valor, mostra opções genéricas
-            optgroupCartao.innerHTML = '<option value="" disabled selected>Informe um valor primeiro</option>';
+            optgroupCartao.innerHTML = '<option value="" disabled>Informe um valor primeiro</option>';
             optgroupPix.innerHTML = '<option value="" disabled>Informe um valor primeiro</option>';
             return;
         }
 
-        // Gera opções para Cartão
-        for (let parcelas = 1; parcelas <= 12; parcelas++) {
-            const calculo = calcularValorComTaxas(valorLiquido, 'cartao', parcelas);
-            if (calculo) {
-                const option = document.createElement('option');
-                option.value = `cartao_${parcelas}`;
+        // NOVA LÓGICA: Obter formas de pagamento permitidas para o projeto
+        const formasPermitidas = obterFormasPagamentoPermitidas(projetoSelecionado);
+        console.log(`🏗️ Formas de pagamento permitidas para ${projetoSelecionado}:`, formasPermitidas);
 
-                const tipoPagamento = getPaymentTypeName('cartao'); // "Cartão"
-                if (parcelas === 1) {
-                    option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
-                } else {
-                    option.textContent = `Até ${parcelas} parcelas sem juros no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+        // Gera opções para Cartão (apenas se permitido)
+        if (formasPermitidas.includes('cartao')) {
+            for (let parcelas = 1; parcelas <= 12; parcelas++) {
+                const calculo = calcularValorComTaxas(valorLiquido, 'cartao', parcelas);
+                if (calculo) {
+                    const option = document.createElement('option');
+                    option.value = `cartao_${parcelas}`;
+
+                    const tipoPagamento = getPaymentTypeName('cartao');
+                    if (parcelas === 1) {
+                        option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
+                    } else {
+                        option.textContent = `Até ${parcelas} parcelas sem juros no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                    }
+
+                    optgroupCartao.appendChild(option);
                 }
-
-                optgroupCartao.appendChild(option);
             }
+        } else {
+            optgroupCartao.innerHTML = '<option value="" disabled>Não disponível para este projeto</option>';
         }
 
-        // Gera opções para PIX
-        for (let parcelas = 1; parcelas <= 3; parcelas++) {
-            // NOVA LÓGICA: Pula PIX à vista (pix_1) se estiver com 30 dias ou mais da chegada
-            if (parcelas === 1 && !permitePagamentoPIXVista()) {
-                continue; // Pula a criação da opção pix_1
-            }
+        // Gera opções para PIX (apenas as permitidas)
+        let pixAdicionado = false;
 
-            const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
+        // PIX à vista (apenas se permitido)
+        if (formasPermitidas.includes('pix') && permitePagamentoPIXVista()) {
+            const calculo = calcularValorComTaxas(valorLiquido, 'pix', 1);
             if (calculo) {
                 const option = document.createElement('option');
-                option.value = `pix_${parcelas}`;
-
-                const tipoPagamento = getPaymentTypeName('pix'); // "PIX"
-                if (parcelas === 1) {
-                    option.textContent = `À vista no ${tipoPagamento} - ${formatarParaMoeda(calculo.total)}`;
-                } else {
-                    option.textContent = `${parcelas} parcelas no ${tipoPagamento} - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
-                }
-
+                option.value = 'pix_1';
+                option.textContent = `À vista no PIX - ${formatarParaMoeda(calculo.total)}`;
                 optgroupPix.appendChild(option);
+                pixAdicionado = true;
             }
         }
 
-        // NOVA OPÇÃO 1: PIX Antecipado com 5% de desconto (apenas se permitir)
-        if (permitePagamentoAntecipado()) {
+        // PIX parcelado (2 e 3 parcelas, apenas se PIX for permitido)
+        if (formasPermitidas.includes('pix')) {
+            for (let parcelas = 2; parcelas <= 3; parcelas++) {
+                const calculo = calcularValorComTaxas(valorLiquido, 'pix', parcelas);
+                if (calculo) {
+                    const option = document.createElement('option');
+                    option.value = `pix_${parcelas}`;
+                    option.textContent = `${parcelas} parcelas no PIX - ${formatarParaMoeda(calculo.porParcela)}/mês (Total: ${formatarParaMoeda(calculo.total)})`;
+                    optgroupPix.appendChild(option);
+                    pixAdicionado = true;
+                }
+            }
+        }
+
+        // PIX Antecipado (apenas se permitido)
+        if (formasPermitidas.includes('pix_antecipado') && permitePagamentoAntecipado()) {
             const valorComDesconto = valorLiquido * 0.87;
             const option1 = document.createElement('option');
             option1.value = 'pix_antecipado';
             option1.textContent = `PIX Antecipado - ${formatarParaMoeda(valorComDesconto)}`;
             optgroupPix.appendChild(option1);
+            pixAdicionado = true;
         }
 
-        // NOVA OPÇÃO 2: PIX Sinal (30% + 70%)
-        const valorSinal = valorLiquido * 0.30 * 0.92;
-        const valorRestante = valorLiquido * 0.70 * 0.92;
-        const option2 = document.createElement('option');
-        option2.value = 'pix_sinal';
-        option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)}) (Total: ${formatarParaMoeda(valorLiquido * 0.92)})`;
-        optgroupPix.appendChild(option2);
+        // PIX Sinal (apenas se permitido)
+        if (formasPermitidas.includes('pix_sinal')) {
+            const valorSinal = valorLiquido * 0.30 * 0.92;
+            const valorRestante = valorLiquido * 0.70 * 0.92;
+            const option2 = document.createElement('option');
+            option2.value = 'pix_sinal';
+            option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)}) (Total: ${formatarParaMoeda(valorLiquido * 0.92)})`;
+            optgroupPix.appendChild(option2);
+            pixAdicionado = true;
+        }
+
+        // Se nenhuma opção PIX foi adicionada
+        if (!pixAdicionado) {
+            optgroupPix.innerHTML = '<option value="" disabled>Não disponível para este projeto</option>';
+        }
     }
 
     // Função para atualizar o valor calculado
@@ -341,9 +453,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const formaPagamento = campoFormaPagamento.value;
 
         console.log(`🔄 Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
-
-        // A linha 'gerarOpcoesDropdown()' FOI REMOVIDA DAQUI para evitar que o dropdown seja recarregado
-        // durante a seleção, o que impedia a seleção da opção.
 
         if (!formaPagamento) {
             campoValorCalculado.value = '';
@@ -458,6 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'email': 'email',
             'celular': 'celular',
             'evento': 'nomeEvento',
+            'projeto': 'projeto', // NOVO PARÂMETRO
             'valor': 'valor',
             'pagamento': 'formaPagamento',
             'chegada': 'dataChegada',
@@ -561,6 +671,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         // BLOQUEIA O CAMPO DO NOME DO EVENTO
                         bloquearCampo(elemento, 'Nome do evento definido via URL - não pode ser alterado');
+                        break;
+
+                    case 'projeto':
+                        // Valida se o projeto existe no JSON carregado
+                        if (dadosProjetos.projetos && dadosProjetos.projetos[valorDecodificado]) {
+                            elemento.value = valorDecodificado;
+                            console.log(`🏗️ Projeto selecionado: ${valorDecodificado}`);
+                            
+                            // Dispara evento para atualizar formas de pagamento
+                            elemento.dispatchEvent(new Event('change'));
+                        } else {
+                            console.warn(`⚠️ Projeto inválido: ${valorDecodificado}`);
+                        }
                         break;
 
                     case 'formaPagamento':
@@ -688,6 +811,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('valorCalculado').value = '';
         document.getElementById('valorCalculado').placeholder = 'Selecione uma forma de pagamento';
         
+        // NOVO: Redefine o projeto para estado inicial
+        document.getElementById('projeto').value = '';
+        
         // Limpa as opções do dropdown
         document.getElementById('optgroup-cartao').innerHTML = '';
         document.getElementById('optgroup-pix').innerHTML = '';
@@ -785,6 +911,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('formaPagamento').addEventListener('change', function(e) {
         console.log(`💳 Forma de pagamento alterada para: ${e.target.value}`);
         atualizarValorCalculado();
+    });
+
+    // NOVO: Event listener para mudanças no projeto
+    document.getElementById('projeto').addEventListener('change', function(e) {
+        console.log(`🏗️ Projeto alterado para: ${e.target.value}`);
+        
+        // Limpa a forma de pagamento quando projeto muda
+        document.getElementById('formaPagamento').value = '';
+        document.getElementById('valorCalculado').value = '';
+        document.getElementById('valorCalculado').placeholder = 'Selecione uma forma de pagamento';
+        
+        // Esconde a política de cancelamento
+        exibirPoliticaCancelamento(null);
+        
+        // Atualiza as formas de pagamento disponíveis
+        atualizarFormaPagamento();
     });
 
     // NOVO: Event listener para mudanças na data de chegada (para recalcular opções de pagamento)
@@ -935,6 +1077,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             valorCalculadoNumerico = extrairValorNumerico(document.getElementById('valorCalculado').value);
         }
 
+        // ===== ADICIONAR CAMPO COMBINADO ANTES DO ENVIO =====
+        const projetoCompleto = getProjetoCompleto();
+        
         const formData = {
             nomeCompleto: document.getElementById('nomeCompleto').value.trim(),
             cpf: document.getElementById('cpf').value,
@@ -943,6 +1088,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             celular: document.getElementById('celular').value,
             celularLimpo: document.getElementById('celular').value.replace(/[^\d]/g, ''),
             nomeEvento: document.getElementById('nomeEvento').value.trim(),
+            projeto: document.getElementById('projeto').value, // NOVO CAMPO
+            projetoNome: projetoCompleto, // NOVO CAMPO
             valor: document.getElementById('valor').value,
             valorNumerico: valorLiquido,
             formaPagamento: formaPagamento,
@@ -965,6 +1112,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // ===== VALIDAÇÕES =====
+
+        // NOVA VALIDAÇÃO: Projeto obrigatório
+        if (!formData.projeto) {
+            restaurarBotao();
+            mostrarMensagem('Por favor, selecione um projeto.', 'erro');
+            return;
+        }
 
         // Validação do regulamento
         if (!formData.aceitoRegulamento) {
@@ -1018,6 +1172,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // NOVA VALIDAÇÃO: Verificar se a forma de pagamento é permitida para o projeto
+        const formasPermitidas = obterFormasPagamentoPermitidas(formData.projeto);
+        const [tipoFormaPagamento] = formData.formaPagamento.split('_');
+        
+        if (!formasPermitidas.includes(tipoFormaPagamento) && !formasPermitidas.includes(formData.formaPagamento)) {
+            restaurarBotao();
+            mostrarMensagem('A forma de pagamento selecionada não é permitida para este projeto.', 'erro');
+            return;
+        }
+
         // NOVA VALIDAÇÃO: Para PIX antecipado, verificar se ainda está dentro do prazo
         if (formData.formaPagamento === 'pix_antecipado' && !permitePagamentoAntecipado()) {
             restaurarBotao();
@@ -1059,6 +1223,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Atualiza loading para envio
         submitButton.innerHTML = '<span class="loading-spinner"></span> Enviando dados...';
+
+        // ===== DEBUG PARA VERIFICAR SE OS CAMPOS DE PROJETO ESTÃO SENDO ENVIADOS =====
+        console.log('Payload final completo:', formData);
+        console.log('Campo projeto no payload:', formData.projeto);
+        console.log('Campo projetoNome no payload:', formData.projetoNome);
 
         // Envio para N8N
         console.log('📦 Enviando dados para n8n...', formData);
@@ -1105,8 +1274,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ===== INICIALIZAÇÃO =====
 
-    // Carrega as políticas no início
-    await carregarPoliticas();
+    // Carrega as políticas e projetos no início
+    await Promise.all([
+        carregarPoliticas(),
+        carregarProjetos()
+    ]);
 
     // Chamadas iniciais para garantir que o dropdown esteja populado
     // e o cálculo seja feito quando a página carrega, mesmo sem interação do usuário.
