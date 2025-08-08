@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tipo: 'pix_sinal',
                 parcelas: 1,
                 nome: 'PIX Sinal - 30% + 70% no check-out',
-                taxa: { taxaFixa: 0, taxaPercentual: 0 }
+                taxa: { taxaFixa: 0, taxaPercentual: 0.0399 }
             };
         }
 
