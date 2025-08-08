@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const taxasPagamento = {
         cartao: {
-            1: { nome: 'Cartão - À vista', taxaFixa: 0.00, taxaPercentual: -0.0399 },
-            6: { nome: 'Cartão - até 6 parcelas sem juros', taxaFixa: 0.00, taxaPercentual: 0.08 }
+            1: { nome: 'Cartão - À vista', taxaFixa: 0.00, taxaPercentual: 0.0399 },
+            6: { nome: 'Cartão - até 6 parcelas sem juros', taxaFixa: 0.00, taxaPercentual: 0.00 }
         },
         pix: {
             1: { nome: 'PIX - À vista', taxaFixa: 0.00, taxaPercentual: 0.0000 }
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fórmula: V_bruto = (V_liquido + T_fixa) / (1 - P_percentual)
-        const valorBrutoOriginal = (valorNumerico + taxa.taxaFixa) / (1 - taxa.taxaPercentual);
+        const valorBrutoOriginal = (valorNumerico + taxa.taxaFixa) * (1 - taxa.taxaPercentual);
 
         // --- INÍCIO DA NOVA CORREÇÃO DE ARREDONDAMENTO (todas as parcelas arredondadas para cima) ---
 
