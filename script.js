@@ -114,6 +114,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return diasDiferenca >= 30;
     }
 
+// NOVA FUNÇÃO: Controlar visibilidade das opções de PIX
+function controlarVisibilidadePix() {
+    const pixAntecipado = document.querySelector('option[value="pix_antecipado"]');
+    const pix1 = document.querySelector('option[value="pix_1"]');
+    
+    if (pixAntecipado && pix1) {
+        if (pixAntecipado.style.display !== 'none') {
+            // Se pix_antecipado está visível, oculta pix_1
+            pix1.style.display = 'none';
+        } else {
+            // Se pix_antecipado está oculto, mostra pix_1
+            pix1.style.display = '';
+        }
+    }
+}
+
     // Função para gerar opções do dropdown dinamicamente
     function gerarOpcoesDropdown() {
         const campoValor = document.getElementById('valor');
@@ -186,6 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
         option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)})`;
         optgroupPix.appendChild(option2);
     }
+// Aplica a regra de visibilidade após gerar as opções
+controlarVisibilidadePix();
 
     // Função para atualizar o valor calculado
     function atualizarValorCalculado() {
