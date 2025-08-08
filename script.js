@@ -82,9 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function extrairValorNumerico(valorFormatado) {
         if (!valorFormatado) return 0;
 
-        // Remove R$, espaços, pontos (milhares) e converte vírgula para ponto
+        // Remove R\$, espaços, pontos (milhares) e converte vírgula para ponto
         let valor = valorFormatado
-            .replace(/R$\s?/g, '')
+            .replace(/R\$\s?/g, '')
             .replace(/\./g, '')
             .replace(',', '.');
 
@@ -203,6 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log(`🔄 Atualizando cálculo - Valor: ${valorLiquido}, Forma: ${formaPagamento}`);
 
+        // A linha 'gerarOpcoesDropdown()' FOI REMOVIDA DAQUI para evitar que o dropdown seja recarregado
+        // durante a seleção, o que impedia a seleção da opção.
+
         if (!formaPagamento) {
             campoValorCalculado.value = '';
             campoValorCalculado.placeholder = 'Selecione uma forma de pagamento';
@@ -223,13 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // NOVA LÓGICA: Para pix_sinal e pix_1, aplicar desconto de 8% com arredondamento para zero casas decimais
-        if (formaPagamento === 'pix_sinal' || formaPagamento === 'pix_1') {
-            const valorComDesconto = valorLiquido * 0.92; // 8% de desconto
-            const valorArredondado = Math.round(valorComDesconto); // Arredondamento para zero casas decimais
-            campoValorCalculado.value = formatarParaMoeda(valorArredondado);
+        if (formaPagamento === 'pix_sinal') {
+            campoValorCalculado.value = formatarParaMoeda(valorLiquido);
             campoValorCalculado.placeholder = '';
-            console.log(`💡 Desconto de 8% aplicado para ${formaPagamento}: ${valorLiquido} -> ${valorArredondado}`);
             return;
         }
 
@@ -380,10 +379,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'valor':
                         console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
 
-                        // Se o valor já tem R$, usa diretamente
-                        if (valorDecodificado.includes('R$')) {
+                        // Se o valor já tem R\$, usa diretamente
+                        if (valorDecodificado.includes('R\$')) {
                             elemento.value = valorDecodificado;
-                            console.log(`✅ Valor com R$ aplicado diretamente: ${valorDecodificado}`);
+                            console.log(`✅ Valor com R\$ aplicado diretamente: ${valorDecodificado}`);
                         } else {
                             // Converte valor numérico para formato monetário brasileiro
                             let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
@@ -394,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 .replace('.', ',')
                                 .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-                            const valorFinal = 'R$ ' + valorFormatado;
+                            const valorFinal = 'R\$ ' + valorFormatado;
                             elemento.value = valorFinal;
                             console.log(`💰 Valor formatado final: ${valorFinal}`);
                         }
@@ -594,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
         value = (parseInt(value) / 100).toFixed(2);
         value = value.replace('.', ',');
         value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        e.target.value = 'R$ ' + value;
+        e.target.value = 'R\$ ' + value;
 
         // Atualiza as opções do dropdown e o valor calculado em tempo real
         gerarOpcoesDropdown(); // Adicionado aqui para recalcular as opções quando o valor muda
@@ -608,13 +607,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let value = e.target.value;
-        if (value && !value.startsWith('R$ ')) {
+        if (value && !value.startsWith('R\$ ')) {
             let numericValue = value.replace(/\D/g, '');
             if (numericValue) {
                 numericValue = (parseInt(numericValue) / 100).toFixed(2);
                 numericValue = numericValue.replace('.', ',');
                 numericValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                e.target.value = 'R$ ' + numericValue;
+                e.target.value = 'R\$ ' + numericValue;
             }
         }
         // Atualiza o valor calculado após perder o foco
@@ -677,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function converterValorParaNumero(valorFormatado) {
         if (!valorFormatado) return 0;
-        let valor = valorFormatado.replace(/R$\s?/g, '').replace(/\./g, '');
+        let valor = valorFormatado.replace(/R\$\s?/g, '').replace(/\./g, '');
         valor = valor.replace(',', '.');
         return parseFloat(valor) || 0;
     }
@@ -769,9 +768,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (formaPagamento === 'pix_antecipado') {
             valorCalculadoNumerico = valorLiquido * 0.95;
-        } else if (formaPagamento === 'pix_sinal' || formaPagamento === 'pix_1') {
-            // NOVA LÓGICA: Para pix_sinal e pix_1, aplicar desconto de 8% com arredondamento para zero casas decimais
-            valorCalculadoNumerico = Math.round(valorLiquido * 0.92);
+        } else if (formaPagamento === 'pix_sinal' || formaPagamento === 'pix_1'){
+            valorCalculadoNumerico = valorLiquido * 0.98;
         } else {
             valorCalculadoNumerico = extrairValorNumerico(document.getElementById('valorCalculado').value);
         }
