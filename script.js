@@ -678,6 +678,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (dadosProjetos.projetos && dadosProjetos.projetos[valorDecodificado]) {
                             elemento.value = valorDecodificado;
                             console.log(`🏗️ Projeto selecionado: ${valorDecodificado}`);
+
+        // NOVO: BLOQUEIA O CAMPO DO PROJETO
+        bloquearCampo(elemento, 'Projeto definido via URL - não pode ser alterado');
+        
+    break;
                             
                             // Dispara evento para atualizar formas de pagamento
                             elemento.dispatchEvent(new Event('change'));
