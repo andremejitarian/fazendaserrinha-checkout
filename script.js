@@ -201,7 +201,7 @@ function permitePagamentoPIXVista() {
         const valorRestante = valorLiquido * 0.70 * 0.92;
         const option2 = document.createElement('option');
         option2.value = 'pix_sinal';
-        option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)})`;
+        option2.textContent = `PIX Sinal - 30% agora (${formatarParaMoeda(valorSinal)}) + 70% no check-out (${formatarParaMoeda(valorRestante)}) (Total: ${formatarParaMoeda(valorLiquido * 0.92)})`;
         optgroupPix.appendChild(option2);
     }
 
@@ -278,7 +278,7 @@ function permitePagamentoPIXVista() {
             return {
                 tipo: 'pix_antecipado',
                 parcelas: 1,
-                nome: 'PIX Antecipado com 5% de desconto',
+                nome: 'PIX Antecipado',
                 taxa: { taxaFixa: 0, taxaPercentual: 0 }
             };
         }
