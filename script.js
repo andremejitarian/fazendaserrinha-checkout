@@ -39,9 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Calcular o valor de cada parcela sem arredondamento
         const valorPorParcelaRaw = valorBrutoOriginal / parcelas;
 
-        // 2. Arredondar o valor de CADA parcela para cima, para 2 casas decimais
+        // 2. Arredondar o valor de CADA parcela para baixo, para 2 casas decimais
         // Ex: 185.61857... -> 185.62
-        const valorPorParcela = Math.ceil(valorPorParcelaRaw * 100) / 100;
+        const valorPorParcela = Math.floor(valorPorParcelaRaw * 100) / 100;
 
         // 3. O valor total agora será o valor da parcela arredondado para cima multiplicado pelo número de parcelas
         // Isso garante que (parcela * quantidade) = total exibido
