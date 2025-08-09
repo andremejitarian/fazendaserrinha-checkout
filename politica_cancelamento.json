@@ -16,11 +16,16 @@
       "aplicavel_para": ["pix_1"]
     },
     "4": {
-      "titulo": "Política de Cancelamento - Cartão",
+      "titulo": "Política de Cancelamento - Cartão 1x",
       "texto": "Em caso de cancelamento da participação, a restituição dos valores pagos seguirá os seguintes critérios:\n **Restituição integral**, desde que comunicado com antecedência mínima de 30 dias antes do início da data de estadia.\n **Restituição de 50%**, desde que comunicado até 15 dias antes do início da data de estadia. Para os outros casos, não haverá restituição.",
-      "aplicavel_para": ["cartao"]
+      "aplicavel_para": ["cartao_1"]
     },
     "5": {
+      "titulo": "Política de Cancelamento - Cartão 6x",
+      "texto": "Em caso de cancelamento da participação, a restituição dos valores pagos seguirá os seguintes critérios:\n **Restituição integral**, desde que comunicado com antecedência mínima de 30 dias antes do início da data de estadia.\n **Restituição de 50%**, desde que comunicado até 15 dias antes do início da data de estadia. Para os outros casos, não haverá restituição.",
+      "aplicavel_para": ["cartao_6"]
+    },
+    "6": {
       "titulo": "Política de Cancelamento - Outras Formas",
       "texto": "🔄 **Cancelamento Flexível**: Cancelamentos até 7 dias antes da chegada: reembolso integral. Entre 3-7 dias: reembolso de 50%. Menos de 3 dias: sem reembolso, mas possibilidade de reagendamento.",
       "aplicavel_para": ["outras"]
