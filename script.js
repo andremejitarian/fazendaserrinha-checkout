@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         "aplicavel_para": ["pix_antecipado"]
                     },
                     "2": {
-                        "titulo": "Política de Cancelamento - PIX Sinal",
+                        "titulo": "Política de Cancelamento -- PIX Sinal",
                         "texto": "📋 Em caso de cancelamento da participação, a restituição de valores seguirá os seguintes critérios: Restituição integral, desde que comunicado com antecedência mínima de 30 dias antes do início da data de estadia. Restituição de 50%, desde que comunicado até 15 dias antes do início da data de estadia. Para os outros casos, não haverá restituição.",
                         "aplicavel_para": ["pix_sinal"]
                     },
