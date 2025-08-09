@@ -49,11 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         "texto": "⚠️ **Atenção**: Pagamentos antecipados via PIX não são reembolsáveis. Em caso de cancelamento, será emitido um voucher válido por 12 meses para uso em futuras estadias.",
                         "aplicavel_para": ["pix_antecipado"]
                     },
-                    "2": {
-                        "titulo": "Política de Cancelamento - PIX Sinal",
-                        "texto": "📋 **Cancelamento**: Cancelamentos até 15 dias antes da data de chegada: reembolso de 80% do valor pago. Cancelamentos com menos de 15 dias: sem reembolso, mas possibilidade de reagendamento sujeito à disponibilidade.",
-                        "aplicavel_para": ["pix_sinal"]
-                    },
                     "3": {
                         "titulo": "Política de Cancelamento - Outras Formas",
                         "texto": "🔄 **Cancelamento Flexível**: Cancelamentos até 7 dias antes da chegada: reembolso integral. Entre 3-7 dias: reembolso de 50%. Menos de 3 dias: sem reembolso, mas possibilidade de reagendamento.",
@@ -79,11 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         "nome": "Fazenda Serrinha",
                         "formas_pagamento_permitidas": ["cartao", "pix", "pix_antecipado", "pix_sinal"],
                         "descricao": "Projeto principal da fazenda com todas as opções de pagamento"
-                    },
-                    "retiro_espiritual": {
-                        "nome": "Retiro Espiritual",
-                        "formas_pagamento_permitidas": ["pix", "pix_sinal"],
-                        "descricao": "Projeto focado em retiros, apenas PIX"
                     }
                 }
             };
