@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return dadosPoliticas.politicas['4'];
             } else {
                 // Todas as outras formas de pagamento
-                return dadosPoliticas.politicas['3'];
+                return dadosPoliticas.politicas['5'];
             }
         }
         
