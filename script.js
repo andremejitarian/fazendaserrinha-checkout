@@ -49,6 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         "texto": "⚠️ **Atenção**: Pagamentos antecipados via PIX não são reembolsáveis. Em caso de cancelamento, será emitido um voucher válido por 12 meses para uso em futuras estadias.",
                         "aplicavel_para": ["pix_antecipado"]
                     },
+                    "2": {
+                        "titulo": "Política de Cancelamento - PIX Sinal",
+                        "texto": "📋 Em caso de cancelamento da participação, a restituição de valores seguirá os seguintes critérios: Restituição integral, desde que comunicado com antecedência mínima de 30 dias antes do início da data de estadia. Restituição de 50%, desde que comunicado até 15 dias antes do início da data de estadia. Para os outros casos, não haverá restituição.",
+                        "aplicavel_para": ["pix_sinal"]
+                    },
                     "3": {
                         "titulo": "Política de Cancelamento - Outras Formas",
                         "texto": "🔄 **Cancelamento Flexível**: Cancelamentos até 7 dias antes da chegada: reembolso integral. Entre 3-7 dias: reembolso de 50%. Menos de 3 dias: sem reembolso, mas possibilidade de reagendamento.",
