@@ -142,9 +142,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return dadosPoliticas.politicas['3'];
             } else if (formaPagamento === 'cartao_1') {
                 return dadosPoliticas.politicas['4'];
+            } else if (formaPagamento === 'cartao_6') {
+                return dadosPoliticas.politicas['5'];
             } else {
                 // Todas as outras formas de pagamento
-                return dadosPoliticas.politicas['5'];
+                return dadosPoliticas.politicas['6'];
             }
         }
         
