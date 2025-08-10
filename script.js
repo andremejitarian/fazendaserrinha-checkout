@@ -680,18 +680,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (dadosProjetos.projetos && dadosProjetos.projetos[valorDecodificado]) {
                             elemento.value = valorDecodificado;
                             console.log(`🏗️ Projeto selecionado: ${valorDecodificado}`);
-
-                    case 'dataChegada':
-                    case 'dataSaida':
-                        // Converte diferentes formatos de data para YYYY-MM-DD
-                        const dataFormatada = formatarDataParaInput(valorDecodificado);
-                        if (dataFormatada) {
-                            elemento.value = dataFormatada;
-        
-                        // NOVO: BLOQUEIA OS CAMPOS DE DATA
-                        bloquearCampo(elemento, `${campo === 'dataChegada' ? 'Data de chegada' : 'Data de saída'} definida via URL - não pode ser alterada`);
-                        }
                         break;
+
+case 'dataChegada':
+case 'dataSaida':
+    // Converte diferentes formatos de data para YYYY-MM-DD
+    const dataFormatada = formatarDataParaInput(valorDecodificado);
+    if (dataFormatada) {
+        elemento.value = dataFormatada;
+        
+        // BLOQUEIA OS CAMPOS DE DATA QUANDO PREENCHIDOS VIA URL
+        const nomeAmigavel = campo === 'dataChegada' ? 'Data de chegada' : 'Data de saída';
+        bloquearCampo(elemento, `${nomeAmigavel} definida via URL - não pode ser alterada`);
+    }
+    break;
 
                         // NOVO: BLOQUEIA O CAMPO DO PROJETO
                         bloquearCampo(elemento, 'Projeto definido via URL - não pode ser alterado');
