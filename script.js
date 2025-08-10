@@ -681,10 +681,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                             elemento.value = valorDecodificado;
                             console.log(`🏗️ Projeto selecionado: ${valorDecodificado}`);
 
-        // NOVO: BLOQUEIA O CAMPO DO PROJETO
-        bloquearCampo(elemento, 'Projeto definido via URL - não pode ser alterado');
+                    case 'dataChegada':
+                    case 'dataSaida':
+                        // Converte diferentes formatos de data para YYYY-MM-DD
+                        const dataFormatada = formatarDataParaInput(valorDecodificado);
+                        if (dataFormatada) {
+                            elemento.value = dataFormatada;
         
-    break;
+                        // NOVO: BLOQUEIA OS CAMPOS DE DATA
+                        bloquearCampo(elemento, `${campo === 'dataChegada' ? 'Data de chegada' : 'Data de saída'} definida via URL - não pode ser alterada`);
+                        }
+                        break;
+
+                        // NOVO: BLOQUEIA O CAMPO DO PROJETO
+                        bloquearCampo(elemento, 'Projeto definido via URL - não pode ser alterado');
+                        break;
                             
                             // Dispara evento para atualizar formas de pagamento
                             elemento.dispatchEvent(new Event('change'));
