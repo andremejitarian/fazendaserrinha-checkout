@@ -12,7 +12,7 @@
     },
     "3": {
       "titulo": "Política de confirmação e cancelamento de reservas - PIX á vista",
-      "texto": "Em caso de cancelamento da participação, a restituição dos valores pagos seguirá os seguintes critérios:\n **Restituição integral**, desde que comunicado com antecedência mínima de 30 dias antes do início da data de estadia.\n **Restituição de 50%**, desde que comunicado até 15 dias antes do início da data de estadia. Para os outros casos, não haverá restituição.",
+      "texto": "**Confirmação:**\n A reserva só é garantida após o pagamento confirmado, mesmo que o link gerado tenha vencimento na data de chegada.\n**Cancelamento:**\n Até 30 dias antes da data de chegada – reembolso de 100% do valor pago.\n Até 15 dias antes da data de chegada – reembolso de 50% do valor pago.\n Menos de 15 dias antes da data de chegada – sem reembolso.",
       "aplicavel_para": ["pix_1"]
     },
     "4": {
@@ -22,12 +22,12 @@
     },
     "5": {
       "titulo": "Política de confirmação e cancelamento de reservas - Cartão 6x",
-      "texto": "Em caso de cancelamento da participação, a restituição dos valores pagos seguirá os seguintes critérios:\n **Restituição integral**, desde que comunicado com antecedência mínima de 30 dias antes do início da data de estadia.\n **Restituição de 50%**, desde que comunicado até 15 dias antes do início da data de estadia. Para os outros casos, não haverá restituição.",
+      "texto": "**Confirmação:**\n A reserva só é garantida após o pagamento confirmado, mesmo que o link gerado tenha vencimento na data de chegada.\n**Cancelamento:**\n Até 30 dias antes da data de chegada – reembolso de 100% do valor pago.\n Até 15 dias antes da data de chegada – reembolso de 50% do valor pago.\n Menos de 15 dias antes da data de chegada – sem reembolso.",
       "aplicavel_para": ["cartao_6"]
     },
     "6": {
       "titulo": "Política de confirmação e cancelamento de reservas - Outras Formas",
-      "texto": "🔄 **Cancelamento Flexível**: Cancelamentos até 7 dias antes da chegada: reembolso integral. Entre 3-7 dias: reembolso de 50%. Menos de 3 dias: sem reembolso, mas possibilidade de reagendamento.",
+      "texto": "**Confirmação:**\n A reserva só é garantida após o pagamento confirmado, mesmo que o link gerado tenha vencimento na data de chegada.\n**Cancelamento:**\n Até 30 dias antes da data de chegada – reembolso de 100% do valor pago.\n Até 15 dias antes da data de chegada – reembolso de 50% do valor pago.\n Menos de 15 dias antes da data de chegada – sem reembolso.",
       "aplicavel_para": ["outras"]
     }
   },
