@@ -2,7 +2,7 @@
   "politicas": {
     "1": {
       "titulo": "Política de confirmação e cancelamento de reservas - PIX Antecipado",
-      "texto": "⚠️ **Atenção**: Em caso de cancelamento da participação, NÃO haverá restituição do valor pago devido ao preço promocional.",
+      "texto": "⚠️ **Atenção**: Valor válido apenas para reservas **pagas** com mais de 30 dias de antecedência da data de chegada.\n **Cancelamento:** Por se tratar de tarifa promocional, não há restituição de valores pagos.",
       "aplicavel_para": ["pix_antecipado"]
     },
     "2": {
