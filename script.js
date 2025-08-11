@@ -588,21 +588,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ===== FUNÇÃO PARA BLOQUEAR CAMPOS =====
-    function bloquearCampo(elemento, motivo = 'Campo preenchido automaticamente') {
-        if (elemento) {
-            elemento.readOnly = true;
-            elemento.disabled = true;
+function bloquearCampo(elemento, motivo = 'Campo preenchido automaticamente', ocultar = false) {
+    if (elemento) {
+        elemento.readOnly = true;
+        elemento.disabled = true;
+        
+        if (ocultar) {
+            // Oculta o campo completamente
+            const container = elemento.closest('.form-group') || elemento.parentElement;
+            if (container) {
+                container.style.display = 'none';
+            } else {
+                elemento.style.display = 'none';
+            }
+        } else {
+            // Apenas desabilita visualmente
             elemento.style.backgroundColor = '#f5f5f5';
             elemento.style.color = '#666';
             elemento.style.cursor = 'not-allowed';
-            elemento.title = motivo;
-            
-            // Adiciona uma classe para identificação visual
-            elemento.classList.add('campo-bloqueado');
-            
-            console.log(`🔒 Campo '${elemento.id}' foi bloqueado: ${motivo}`);
         }
+        
+        elemento.title = motivo;
+        elemento.classList.add('campo-bloqueado');
+        
+        console.log(`🔒 Campo '${elemento.id}' foi ${ocultar ? 'ocultado' : 'bloqueado'}: ${motivo}`);
     }
+}
 
     // Função para preencher os campos do formulário
     function preencherCamposViaURL() {
@@ -642,31 +653,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                         elemento.dispatchEvent(new Event('input'));
                         break;
 
-                    case 'valor':
-                        console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
+case 'valor':
+    console.log(`🔍 Processando valor da URL: "${valorDecodificado}"`);
 
-                        // Se o valor já tem R\$, usa diretamente
-                        if (valorDecodificado.includes('R\$')) {
-                            elemento.value = valorDecodificado;
-                            console.log(`✅ Valor com R\$ aplicado diretamente: ${valorDecodificado}`);
-                        } else {
-                            // Converte valor numérico para formato monetário brasileiro
-                            let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
-                            console.log(`🔢 Valor numérico extraído: ${valorNumerico}`);
+    // Se o valor já tem R$, usa diretamente
+    if (valorDecodificado.includes('R$')) {
+        elemento.value = valorDecodificado;
+        console.log(`✅ Valor com R$ aplicado diretamente: ${valorDecodificado}`);
+    } else {
+        // Converte valor numérico para formato monetário brasileiro
+        let valorNumerico = parseFloat(valorDecodificado.replace(',', '.')) || 0;
+        console.log(`🔢 Valor numérico extraído: ${valorNumerico}`);
 
-                            // Formata para moeda brasileira
-                            const valorFormatado = valorNumerico.toFixed(2)
-                                .replace('.', ',')
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        // Formata para moeda brasileira
+        const valorFormatado = valorNumerico.toFixed(2)
+            .replace('.', ',')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-                            const valorFinal = 'R\$ ' + valorFormatado;
-                            elemento.value = valorFinal;
-                            console.log(`💰 Valor formatado final: ${valorFinal}`);
-                        }
-                        
-                        // BLOQUEIA O CAMPO DE VALOR
-                        bloquearCampo(elemento, 'Valor definido via URL - não pode ser alterado');
-                        break;
+        const valorFinal = 'R$ ' + valorFormatado;
+        elemento.value = valorFinal;
+        console.log(`💰 Valor formatado final: ${valorFinal}`);
+    }
+    
+    // OCULTA O CAMPO DE VALOR (passando true como terceiro parâmetro)
+    bloquearCampo(elemento, 'Valor definido via URL - campo oculto', true);
+    break;
 
                     case 'nomeEvento':
                         elemento.value = valorDecodificado;
