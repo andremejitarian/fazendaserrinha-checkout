@@ -682,6 +682,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         bloquearCampo(elemento, 'Data de chegada definido via URL - não pode ser alterado');
                         break;
 
+                    case 'dataSaida':
+                        elemento.value = valorDecodificado;
+                        
+                        // BLOQUEIA O CAMPO DO NOME DO EVENTO
+                        bloquearCampo(elemento, 'Data de saida definido via URL - não pode ser alterado');
+                        break;
 
                     case 'projeto':
                         // Valida se o projeto existe no JSON carregado
