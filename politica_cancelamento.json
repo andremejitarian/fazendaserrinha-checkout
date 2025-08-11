@@ -2,7 +2,7 @@
   "politicas": {
     "1": {
       "titulo": "Política de confirmação e cancelamento de reservas - PIX Antecipado",
-      "texto": "⚠️ **Atenção**: Valor válido apenas para reservas **pagas** com mais de 30 dias de antecedência da data de chegada.\n **Cancelamento:** Por se tratar de tarifa promocional, não há restituição de valores pagos.",
+      "texto": "⚠️ **Atenção**:\n Valor válido apenas para reservas **pagas** com mais de 30 dias de antecedência da data de chegada.\n **Cancelamento:**\n Por se tratar de tarifa promocional, não há restituição de valores pagos.",
       "aplicavel_para": ["pix_antecipado"]
     },
     "2": {
@@ -17,7 +17,7 @@
     },
     "4": {
       "titulo": "Política de confirmação e cancelamento de reservas - Cartão 1x",
-      "texto": "**Confirmação:**\n A reserva só é garantida após o pagamento confirmado, mesmo que o link gerado tenha vencimento na data de chegada.\n**Cancelamento:**\n Até 30 dias antes da estadia – reembolso de 100% do valor pago.\n Até 15 dias antes da estadia – reembolso de 50% do valor pago.\n Menos de 15 dias antes – sem reembolso.",
+      "texto": "**Confirmação:**\n A reserva só é garantida após o pagamento confirmado, mesmo que o link gerado tenha vencimento na data de chegada.\n**Cancelamento:**\n Até 30 dias antes da data de chegada – reembolso de 100% do valor pago.\n Até 15 dias antes da data de chegada – reembolso de 50% do valor pago.\n Menos de 15 dias antes da data de chegada – sem reembolso.",
       "aplicavel_para": ["cartao_1"]
     },
     "5": {
