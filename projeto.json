@@ -6,9 +6,9 @@
       "descricao": "Projeto principal da fazenda com todas as opções de pagamento"
     },
     "festival": {
-      "nome": "Festival Arte Serrinha – Primavera",
+      "nome": "Festival Arte Serrinha – Primavera 2025",
       "formas_pagamento_permitidas": ["cartao", "pix", "pix_antecipado", "pix_sinal"],
-      "descricao": "Projeto focado em retiros, apenas PIX"
+      "descricao": "Festival de Arte Serrinha, aceita todas as formas de pagamento"
     },
     "evento_corporativo": {
       "nome": "Evento Corporativo",
