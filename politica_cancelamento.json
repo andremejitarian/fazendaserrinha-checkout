@@ -7,7 +7,7 @@
     },
     "2": {
       "titulo": "Política de confirmação e cancelamento de reservas",
-      "texto": "**Confirmação da Reserva:**\n- O sinal corresponde a **30% do valor total da reserva**, e deve ser pago no momento da reserva.\n Enquanto o pagamento do sinal não for realizado, a hospedagem permanecerá disponível para outros interessados.\n- O saldo de **70%** deverá ser pago até a data de saída.\n**Cancelamento:**\n Até 30 dias antes da data de chegada – reembolso de 100% do valor pago.\n Até 15 dias antes da data de chegada – reembolso de 50% do valor pago.\n Menos de 15 dias antes da data de chegada – sem reembolso.",
+      "texto": "**Confirmação da Reserva:**\n- O sinal corresponde a **30% do valor total da reserva**, e deve ser pago no momento da reserva.\n- Enquanto o pagamento do sinal não for realizado, a hospedagem permanecerá disponível para outros interessados.\n- O saldo de **70%** deverá ser pago até a data de saída.\n**Cancelamento:**\n Até 30 dias antes da data de chegada – reembolso de 100% do valor pago.\n Até 15 dias antes da data de chegada – reembolso de 50% do valor pago.\n Menos de 15 dias antes da data de chegada – sem reembolso.",
       "aplicavel_para": ["pix_sinal"]
     },
     "3": {
