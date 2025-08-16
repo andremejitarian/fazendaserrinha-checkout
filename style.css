@@ -209,6 +209,17 @@ input::placeholder {
     color: #aaa;
 }
 
+/* Controle de redimensionamento do textarea */
+textarea {
+  resize: vertical;         /* permite o usuário aumentar/ diminuir a altura */
+  min-height: 96px;         /* ~3-4 linhas */
+  max-height: 320px;        /* evita que a página “estique” demais */
+  overflow-y: auto;         /* barra de rolagem aparece quando necessário */
+  line-height: 1.4;
+  white-space: pre-wrap;    /* preserva quebras e quebra linhas longas */
+  word-break: break-word;   /* evita overflow em palavras muito longas */
+}
+
 /* ===== NOVOS ESTILOS PARA FORMA DE PAGAMENTO ===== */
 
 /* Select (Dropdown) */
