@@ -192,6 +192,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             .replace(/\n/g, '<br>'); // quebras de linha
         
         texto.innerHTML = textoHTML;
+
+        // Atualiza o campo oculto com a descrição da política
+        const descricaoField = document.getElementById('politicaCancelamentoDescricao');
+        if (descricaoField) {
+            descricaoField.value = politica.texto; // Armazena o texto original, sem formatação HTML
+        }
         
         // Mostra a política com animação
         container.style.display = 'block';
@@ -634,6 +640,14 @@ function bloquearCampo(elemento, motivo = 'Campo preenchido automaticamente', oc
             if (elemento) {
                 // Decodifica o valor (para caracteres especiais)
                 const valorDecodificado = decodeURIComponent(valor);
+                
+                // Preenche o campo quarto se um projeto foi selecionado
+                if (campo === 'projeto' && dadosProjetos.projetos && dadosProjetos.projetos[valorDecodificado]) {
+                    const campoQuarto = document.getElementById('quarto');
+                    if (campoQuarto) {
+                        campoQuarto.value = dadosProjetos.projetos[valorDecodificado].quarto || '';
+                    }
+                }
 
                 // Tratamento especial para diferentes tipos de campo
                 switch (campo) {
@@ -953,6 +967,13 @@ case 'valor':
         document.getElementById('valorCalculado').value = '';
         document.getElementById('valorCalculado').placeholder = 'Selecione uma forma de pagamento';
         
+        // Atualiza o campo quarto com base no projeto selecionado
+        const projetoSelecionado = e.target.value;
+        const campoQuarto = document.getElementById('quarto');
+        if (campoQuarto && dadosProjetos.projetos && dadosProjetos.projetos[projetoSelecionado]) {
+            campoQuarto.value = dadosProjetos.projetos[projetoSelecionado].quarto || '';
+        }
+        
         // Esconde a política de cancelamento
         exibirPoliticaCancelamento(null);
         
@@ -1133,7 +1154,8 @@ case 'valor':
             dataSaida: document.getElementById('dataSaida').value,
             aceitoRegulamento: document.getElementById('aceitoRegulamento').checked,
             comunicacoesFazenda: document.querySelector('input[name="comunicacoesFazenda"]:checked') ?
-                document.querySelector('input[name="comunicacoesFazenda"]:checked').value : 'não informado'
+                document.querySelector('input[name="comunicacoesFazenda"]:checked').value : 'não informado',
+            politicaCancelamentoDescricao: document.getElementById('politicaCancelamentoDescricao').value || ''
         };
 
         function restaurarBotao() {

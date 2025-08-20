@@ -79,6 +79,12 @@
 </div>
 
                     <div class="form-group">
+                        <label for="quarto">Acomodação</label>
+                        <input type="text" id="quarto" name="quarto" readonly>
+                        <small class="campo-info">Local de hospedagem definido pelo evento selecionado</small>
+                    </div>
+
+                    <div class="form-group">
                         <label for="nomeEvento">Descrição *</label>
                         <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Digite o nome do evento" required>
                     </div>
@@ -131,6 +137,8 @@
     <div id="politicaTexto" class="politica-texto">
         <!-- O texto da política será inserido aqui dinamicamente -->
     </div>
+    <!-- Campo oculto para armazenar a descrição da política de cancelamento -->
+    <input type="hidden" id="politicaCancelamentoDescricao" name="politicaCancelamentoDescricao">
 </div>
 
                     <h2>SOBRE OS TERMOS</h2>
