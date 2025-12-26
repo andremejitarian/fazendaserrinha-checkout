@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('estadiaForm');
 
     // URL da webhook do n8n (apenas para envio final)
-    const WEBHOOK_URL = 'https://criadordigital-n8n-webhook.kttqgl.easypanel.host/webhook/7a993f54-3b5d-4151-911e-f2e8c6d89e57';
+    const WEBHOOK_URL = 'https://auto-n8n-webhook.rbnawr.easypanel.host/webhook/3d165896-2fb5-47db-a0e9-66c763fd9cec';
 
     // ===== VARIÁVEIS GLOBAIS =====
     let dadosPoliticas = {};
